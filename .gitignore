@@ -1,6 +1,10 @@
 # Backend (excluded for now)
 backend/
 
+# Frontend build artifacts (but keep source)
+frontend/.next/
+frontend/out/
+
 # Dependencies
 node_modules/
 venv/
