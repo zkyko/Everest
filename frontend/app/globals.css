@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #FAFAFA;
+  color: #1A1A1A;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Smooth scrolling for all scrollable containers */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Smooth transitions for common properties */
+a, button, input, select, textarea {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Page transition animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.page-enter {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-text-light border-none px-6 py-4 rounded-m font-semibold text-base w-full flex items-center justify-center gap-2 transition-all shadow-sm hover:bg-primary-dark hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-text-main border-none px-6 py-4 rounded-m font-semibold text-base w-full flex items-center justify-center gap-2 transition-all shadow-sm hover:bg-accent-dark hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-bg-surface text-text-main border border-border px-6 py-4 rounded-m font-semibold text-base w-full flex items-center justify-center gap-2 transition-all hover:bg-bg-elevated hover:border-border-dark active:scale-[0.98];
+  }
+
+  .card {
+    @apply bg-bg-card rounded-l p-5 border border-border shadow-sm transition-all hover:shadow-md;
+  }
+
+  .input-field {
+    @apply w-full bg-bg-surface border border-border rounded-m px-4 py-3 text-base font-normal transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .status-badge.low {
+    @apply bg-status-low/10 text-status-low;
+  }
+
+  .status-badge.medium {
+    @apply bg-status-medium/10 text-status-medium;
+  }
+
+  .status-badge.high {
+    @apply bg-status-high/10 text-status-high;
+  }
+
+  .status-badge.very-high {
+    @apply bg-status-very-high/10 text-status-very-high;
+  }
+
+  .content-padding {
+    @apply px-6;
+  }
+
+  .mobile-container {
+    @apply max-w-[500px] mx-auto min-h-screen flex flex-col relative bg-bg-main;
+  }
+}
+
+/* Smooth scrolling for containers */
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
