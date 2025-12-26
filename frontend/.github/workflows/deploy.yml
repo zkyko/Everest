@@ -31,13 +31,14 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        working-directory: ./frontend
         run: |
+          cd frontend
           npm install --legacy-peer-deps
 
       - name: Build
-        working-directory: ./frontend
-        run: npm run build
+        run: |
+          cd frontend
+          npm run build
         env:
           NODE_ENV: production
 
