@@ -30,11 +30,12 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dir: ./frontend/.npm
+          cache-dir: ./frontend
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install --legacy-peer-deps
+        run: |
+          npm install --legacy-peer-deps
 
       - name: Build
         working-directory: ./frontend
