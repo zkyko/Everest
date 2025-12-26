@@ -1,3 +1,6 @@
+# Backend (excluded for now)
+backend/
+
 # Dependencies
 node_modules/
 venv/
