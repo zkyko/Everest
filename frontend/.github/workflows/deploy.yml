@@ -29,13 +29,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dir: ./frontend
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: |
-          npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Build
         working-directory: ./frontend
