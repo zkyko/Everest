@@ -1,0 +1,7 @@
+{
+  "name": "everest-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Everest Food Truck - Root package for GitHub Actions"
+}
+
