@@ -1,0 +1,26 @@
+# Git
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+!README.md
+!DOCKER_DEPLOYMENT.md
+
+# Environment files (will be created on VPS)
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+

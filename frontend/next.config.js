@@ -9,8 +9,9 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/Everest' : '', // GitHub Pages base path
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Everest' : '', // GitHub Pages asset prefix
+  // Only use basePath for GitHub Pages, not for Docker deployment
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.GITHUB_PAGES ? '/Everest' : ''),
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.GITHUB_PAGES ? '/Everest' : ''),
 }
 
 module.exports = nextConfig
