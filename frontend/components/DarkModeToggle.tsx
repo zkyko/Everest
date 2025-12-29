@@ -9,7 +9,11 @@ export default function DarkModeToggle() {
 
   return (
     <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-      <IconButton onClick={toggleMode} color="inherit">
+      <IconButton
+        onClick={toggleMode}
+        color="inherit"
+        aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
         {mode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
       </IconButton>
     </Tooltip>

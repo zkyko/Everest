@@ -11,27 +11,31 @@ import {
   Button,
   Chip,
   Divider,
-  CircularProgress,
+  Stack,
+  useTheme,
+  Grid
 } from '@mui/material'
-import { ShoppingBag, Trash2, ArrowLeft, Plus, Minus, Clock, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Trash2, ChevronLeft, Plus, Minus, Clock, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/lib/store'
 import { useToast } from '@/components/Toast'
-import BottomNav from '@/components/BottomNav'
-import { statusColors } from '@/lib/theme'
+import { useLanguageStore } from '@/lib/store/languageStore'
+import { translations } from '@/lib/translations'
+
+const MotionBox = motion(Box)
+const MotionCard = motion(Card)
 
 export default function CartPage() {
+  const theme = useTheme()
   const router = useRouter()
+  const { lang } = useLanguageStore()
+  const t = translations[lang].cart
   const { items, removeItem, clearCart, getTotal, addItem } = useCartStore()
   const { addToast } = useToast()
 
-  // Group items by ID and modifiers
   const groupedItems = items.reduce((acc: any, item: any, idx: number) => {
-    // Create a unique key based on item ID and modifiers
-    const modifierKey = item.modifiers 
-      ? JSON.stringify(item.modifiers) 
-      : 'no-modifiers'
-    const key = `${item.id || item.cartId || idx}-${modifierKey}`
-    
+    const modifierKey = item.modifiers ? JSON.stringify(item.modifiers) : 'none'
+    const key = `${item.id}-${modifierKey}`
     if (!acc[key]) {
       acc[key] = { ...item, quantity: 1, indices: [idx] }
     } else {
@@ -45,360 +49,189 @@ export default function CartPage() {
 
   const handleQuantityChange = (item: any, change: number) => {
     if (change < 0 && item.quantity > 1) {
-      // Decrease quantity
-      if (item.indices.length > 0) {
-        removeItem(item.indices[0])
-      }
+      removeItem(item.indices[0])
     } else if (change > 0) {
-      // Increase quantity - add another item
-      const newItem = { ...item }
-      delete newItem.quantity
-      delete newItem.indices
-      delete newItem.cartId
-      // Add to cart
-      addItem(newItem)
+      const { quantity, indices, ...cleanItem } = item
+      addItem(cleanItem)
     }
-  }
-
-  const handleRemoveItem = (item: any) => {
-    item.indices.forEach((i: number) => removeItem(i))
-    addToast('info', 'Item removed from cart')
-  }
-
-  const handleClearCart = () => {
-    clearCart()
-    addToast('info', 'Cart cleared')
-  }
-
-  // Parse modifiers for display
-  const getModifiers = (item: any) => {
-    if (!item.modifiers) return { spiceLevel: null, extras: [] }
-    
-    let spiceLevel: string | null = null
-    const extras: string[] = []
-    
-    if (item.modifiers.spice_level && Array.isArray(item.modifiers.spice_level)) {
-      spiceLevel = item.modifiers.spice_level[0]
-    } else if (item.modifiers.spice_level) {
-      spiceLevel = item.modifiers.spice_level
-    }
-    
-    if (item.modifiers.add_ons && Array.isArray(item.modifiers.add_ons)) {
-      extras.push(...item.modifiers.add_ons)
-    } else if (item.modifiers.extras && Array.isArray(item.modifiers.extras)) {
-      extras.push(...item.modifiers.extras)
-    }
-    
-    return { spiceLevel, extras }
   }
 
   const subtotal = getTotal()
-  const tax = subtotal * 0.0825 // 8.25% tax (Austin, TX)
+  const tax = subtotal * 0.0825
   const total = subtotal + tax
 
   return (
-    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 20 }}>
       {/* Header */}
-      <Box sx={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 40, 
-        bgcolor: 'background.paper', 
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      <Box sx={{
+        position: 'sticky', top: { xs: 0, md: 72 }, zIndex: 100,
+        bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
+        backdropFilter: 'blur(20px)'
       }}>
-        <Container maxWidth={false} sx={{ py: 2, px: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Container maxWidth="lg">
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
               <IconButton
+                aria-label={lang === 'en' ? 'Back' : 'पछाडि'}
                 onClick={() => router.back()}
-                sx={{ 
-                  bgcolor: 'grey.100',
-                  '&:hover': { bgcolor: 'grey.200' },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
+                sx={{ border: '1px solid', borderColor: 'divider' }}
               >
-                <ArrowLeft size={20} />
+                <ChevronLeft size={20} />
               </IconButton>
               <Box>
-                <Typography variant="h1" sx={{ mb: 0.5 }}>
-                  Cart
-                </Typography>
+                <Typography variant="h2" sx={{ fontSize: '1.5rem' }}>{t.title}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {items.length} {items.length === 1 ? 'item' : 'items'}
+                  {items.length} {lang === 'en' ? 'items' : 'परिकार'}
                 </Typography>
               </Box>
-            </Box>
+            </Stack>
             {items.length > 0 && (
               <Button
-                onClick={handleClearCart}
+                onClick={clearCart}
                 size="small"
-                sx={{ 
-                  color: 'error.main',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: 'error.main15' }
-                }}
+                color="error"
+                sx={{ textTransform: 'none', fontWeight: 600 }}
               >
-                Clear
+                {t.clear}
               </Button>
             )}
-          </Box>
+          </Stack>
         </Container>
       </Box>
 
-      {/* Cart Items */}
-      <Container maxWidth={false} sx={{ py: 3, px: 3, pb: items.length > 0 ? 30 : 20 }}>
-        {items.length === 0 ? (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              py: 12,
-              textAlign: 'center',
-              animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <Box sx={{ 
-              width: 80, 
-              height: 80, 
-              borderRadius: '50%', 
-              bgcolor: 'grey.100', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              mb: 3
-            }}>
-              <ShoppingBag size={40} color={statusColors.medium} style={{ opacity: 0.5 }} />
-            </Box>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-              Your Cart is Empty
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 280 }}>
-              Start adding delicious items from our menu
-            </Typography>
-            <Button
-              onClick={() => router.push('/menu')}
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{ minWidth: 200 }}
-            >
-              Browse Menu
-            </Button>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {groupedItemsArray.map((item: any, idx: number) => {
-              const { spiceLevel, extras } = getModifiers(item)
-              return (
-                <Card
-                  key={item.id || item.cartId || idx}
-                  sx={{
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    animation: 'slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    animationDelay: `${idx * 0.05}s`,
-                    animationFillMode: 'both',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: 4
-                    }
-                  }}
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={8}>
+            <AnimatePresence mode="popLayout">
+              {items.length === 0 ? (
+                <MotionBox
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  sx={{ textAlign: 'center', py: 12 }}
                 >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          {item.name}
-                        </Typography>
-                        {item.description && (
-                          <Typography 
-                            variant="body2" 
-                            color="text.secondary" 
-                            sx={{ 
-                              mb: 1,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
-                            }}
-                          >
-                            {item.description}
-                          </Typography>
-                        )}
-                        
-                        {/* Modifiers */}
-                        {(spiceLevel || extras.length > 0) && (
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
-                            {spiceLevel && (
-                              <Chip
-                                label={`Spice: ${spiceLevel}`}
-                                size="small"
-                                sx={{
-                                  height: 22,
-                                  fontSize: '0.7rem',
-                                  bgcolor: 'warning.main15',
-                                  color: 'warning.main',
-                                  fontWeight: 600
-                                }}
-                              />
-                            )}
-                            {extras.map((extra: string, i: number) => (
-                              <Chip
-                                key={i}
-                                label={extra}
-                                size="small"
-                                sx={{
-                                  height: 22,
-                                  fontSize: '0.7rem',
-                                  bgcolor: 'info.main15',
-                                  color: 'info.main',
-                                  fontWeight: 500
-                                }}
-                              />
-                            ))}
+                  <Box sx={{
+                    width: 80, height: 80, borderRadius: '50%', bgcolor: 'rgba(0,0,0,0.03)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3
+                  }}>
+                    <ShoppingBag size={40} strokeWidth={1} />
+                  </Box>
+                  <Typography variant="h3" sx={{ mb: 1 }}>{t.emptyTitle}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>{t.emptySubtitle}</Typography>
+                  <Button variant="contained" onClick={() => router.push('/menu')}>{t.browseMenu}</Button>
+                </MotionBox>
+              ) : (
+                <Stack spacing={2}>
+                  {groupedItemsArray.map((item: any, idx) => (
+                    <MotionCard
+                      key={`${item.id}-${idx}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      layout
+                      sx={{ border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Stack direction="row" spacing={3}>
+                          <Box sx={{
+                            width: 80, height: 80, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.03)',
+                            flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}>
+                            <ShoppingBag size={32} strokeWidth={1} style={{ opacity: 0.2 }} />
                           </Box>
-                        )}
+                          <Box sx={{ flexGrow: 1 }}>
+                            <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                              <Typography variant="h3" sx={{ fontSize: '1.1rem' }}>{item.name}</Typography>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveItem(item)}
+                                color="error"
+                                aria-label={lang === 'en' ? 'Remove item' : 'हटाउनुहोस्'}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            </Stack>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                            ${(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <IconButton
-                              onClick={() => handleQuantityChange(item, -1)}
-                              size="small"
-                              sx={{ 
-                                bgcolor: 'grey.100',
-                                '&:hover': { bgcolor: 'grey.200' },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                              }}
-                            >
-                              <Minus size={16} />
-                            </IconButton>
-                            <Typography variant="body1" sx={{ minWidth: 30, textAlign: 'center', fontWeight: 600 }}>
-                              {item.quantity}
-                            </Typography>
-                            <IconButton
-                              onClick={() => handleQuantityChange(item, 1)}
-                              size="small"
-                              sx={{ 
-                                bgcolor: 'primary.main',
-                                color: 'primary.contrastText',
-                                '&:hover': { bgcolor: 'primary.dark' },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                              }}
-                            >
-                              <Plus size={16} />
-                            </IconButton>
+                            <Stack direction="row" alignItems="center" justifyContent="space-between">
+                              <Stack direction="row" spacing={1}>
+                                <IconButton onClick={() => handleQuantityChange(item, -1)} size="small" sx={{ border: '1px solid', borderColor: 'divider' }}>
+                                  <Minus size={14} />
+                                </IconButton>
+                                <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700 }}>{item.quantity}</Typography>
+                                <IconButton onClick={() => handleQuantityChange(item, 1)} size="small" sx={{ bgcolor: 'black', color: 'white', '&:hover': { bgcolor: 'primary.dark' } }}>
+                                  <Plus size={14} />
+                                </IconButton>
+                              </Stack>
+                              <Typography variant="h3" sx={{ color: 'primary.main' }}>
+                                ${(item.price * item.quantity).toFixed(2)}
+                              </Typography>
+                            </Stack>
                           </Box>
+                        </Stack>
+                      </CardContent>
+                    </MotionCard>
+                  ))}
+                </Stack>
+              )}
+            </AnimatePresence>
+          </Grid>
+
+          {items.length > 0 && (
+            <Grid item xs={12} md={4}>
+              <Box sx={{ position: { md: 'sticky' }, top: { md: 160 } }}>
+                <Card sx={{ bgcolor: 'rgba(0,0,0,0.02)', border: 'none', boxShadow: 'none', borderRadius: 4 }}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Typography variant="h3" sx={{ mb: 3, fontSize: '1.25rem' }}>{t.summary}</Typography>
+
+                    <Stack spacing={2} sx={{ mb: 3 }}>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography color="text.secondary">{t.subtotal}</Typography>
+                        <Typography sx={{ fontWeight: 600 }}>${subtotal.toFixed(2)}</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography color="text.secondary">{t.tax}</Typography>
+                        <Typography sx={{ fontWeight: 600 }}>${tax.toFixed(2)}</Typography>
+                      </Stack>
+                      <Divider />
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="h3">{t.total}</Typography>
+                        <Typography variant="h2" color="primary.main">${total.toFixed(2)}</Typography>
+                      </Stack>
+                    </Stack>
+
+                    <Stack spacing={2} sx={{ mb: 4 }}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Box sx={{ p: 1, borderRadius: 2, bgcolor: 'rgba(0,0,0,0.05)' }}>
+                          <Clock size={16} />
                         </Box>
-                      </Box>
-                      <IconButton
-                        onClick={() => handleRemoveItem(item)}
-                        sx={{ 
-                          color: 'text.secondary',
-                          '&:hover': { 
-                            color: 'error.main',
-                            bgcolor: 'error.main15'
-                          },
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                      >
-                        <Trash2 size={18} />
-                      </IconButton>
-                    </Box>
+                        <Box>
+                          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700 }}>{t.pickupEstimate}</Typography>
+                          <Typography variant="body2" color="text.secondary">12-15 {t.minutes}</Typography>
+                        </Box>
+                      </Stack>
+                    </Stack>
+
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      endIcon={<ArrowRight size={20} />}
+                      onClick={() => router.push('/checkout')}
+                      sx={{ py: 2, borderRadius: 3 }}
+                    >
+                      {t.checkout}
+                    </Button>
                   </CardContent>
                 </Card>
-              )
-            })}
-          </Box>
-        )}
+              </Box>
+            </Grid>
+          )}
+        </Grid>
       </Container>
-
-      {/* Checkout Summary */}
-      {items.length > 0 && (
-        <Box sx={{ 
-          position: 'fixed', 
-          bottom: 80, 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: { xs: '100%', sm: 500 },
-          bgcolor: 'background.paper',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}>
-          <Container maxWidth={false} sx={{ py: 3, px: 3 }}>
-            <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <Clock size={16} color={statusColors.medium} />
-                  <Typography variant="body2" color="text.secondary">
-                    Estimated pickup: 12-15 min
-                  </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    Subtotal
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                    ${subtotal.toFixed(2)}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    Tax (8.25%)
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    ${tax.toFixed(2)}
-                  </Typography>
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Total
-                  </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                    ${total.toFixed(2)}
-                  </Typography>
-                </Box>
-
-                <Button
-                  onClick={() => router.push('/checkout')}
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  size="large"
-                  endIcon={<ChevronRight size={20} />}
-                  sx={{
-                    py: 1.5,
-                    fontWeight: 600,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    '&:hover': {
-                      transform: 'translateY(-1px)',
-                      boxShadow: 4
-                    }
-                  }}
-                >
-                  Proceed to Checkout
-                </Button>
-              </CardContent>
-            </Card>
-          </Container>
-        </Box>
-      )}
-
-      <BottomNav />
     </Box>
   )
+
+  function handleRemoveItem(item: any) {
+    item.indices.forEach((i: number) => removeItem(i))
+    addToast('info', 'Removed')
+  }
 }

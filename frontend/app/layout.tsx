@@ -4,6 +4,9 @@ import './globals.css'
 import { ToastProvider } from '@/components/Toast'
 import MUIThemeProvider from '@/lib/mui-theme-provider'
 import HydrationHandler from '@/components/HydrationHandler'
+import Header from '@/components/Header'
+import BottomNav from '@/components/BottomNav'
+import { Box } from '@mui/material'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +26,13 @@ export default function RootLayout({
         <MUIThemeProvider>
           <ToastProvider>
             <HydrationHandler />
-            {children}
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              <Header />
+              <Box component="main" sx={{ flexGrow: 1, pb: { xs: 8, md: 0 } }}>
+                {children}
+              </Box>
+              <BottomNav />
+            </Box>
           </ToastProvider>
         </MUIThemeProvider>
       </body>

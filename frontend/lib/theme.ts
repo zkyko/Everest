@@ -1,30 +1,31 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles'
 
 const baseTheme: ThemeOptions = {
+  spacing: 8, // Fixed 8px grid
   palette: {
     primary: {
-      main: '#2B2B2B', // Charcoal/Black
-      dark: '#1A1A1A',
-      light: '#4A4A4A',
+      main: '#1A1A1A', // Deeper Charcoal
+      dark: '#000000',
+      light: '#333333',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#F4A261', // Warm yellow/saffron
-      dark: '#E76F51',
-      light: '#F6B88A',
-      contrastText: '#1A1A1A',
+      main: '#E67E22', // Refined Saffron/Carrot
+      dark: '#D35400',
+      light: '#F39C12',
+      contrastText: '#FFFFFF',
     },
     success: {
-      main: '#10B981', // Green (LOW)
+      main: '#27AE60',
     },
     warning: {
-      main: '#F59E0B', // Yellow (MEDIUM)
+      main: '#F1C40F',
     },
     error: {
-      main: '#EF4444', // Red (VERY HIGH)
+      main: '#E74C3C',
     },
     info: {
-      main: '#3B82F6',
+      main: '#3498DB',
     },
   },
   typography: {
@@ -37,56 +38,57 @@ const baseTheme: ThemeOptions = {
       'sans-serif',
     ].join(','),
     h1: {
-      fontSize: '32px',
+      fontSize: '2.5rem',
+      fontWeight: 800,
+      letterSpacing: '-0.03em',
+      lineHeight: 1.1,
+    },
+    h2: {
+      fontSize: '1.75rem',
       fontWeight: 700,
       letterSpacing: '-0.02em',
       lineHeight: 1.2,
     },
-    h2: {
-      fontSize: '24px',
-      fontWeight: 700,
-      letterSpacing: '-0.01em',
-      lineHeight: 1.3,
-    },
     h3: {
-      fontSize: '20px',
+      fontSize: '1.25rem',
       fontWeight: 600,
-      lineHeight: 1.4,
+      letterSpacing: '-0.01em',
     },
-    h4: {
-      fontSize: '18px',
-      fontWeight: 600,
-      lineHeight: 1.4,
+    body1: {
+      fontSize: '1rem',
+      lineHeight: 1.6,
+      letterSpacing: '0.01em',
     },
     button: {
       textTransform: 'none',
       fontWeight: 600,
+      letterSpacing: '0.02em',
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          padding: '16px 24px',
-          fontSize: '16px',
-          fontWeight: 600,
+          borderRadius: 12,
+          padding: '12px 24px',
+          fontSize: '0.95rem',
           boxShadow: 'none',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
-            boxShadow: 'none',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             transform: 'translateY(-1px)',
           },
           '&:active': {
-            transform: 'translateY(0) scale(0.98)',
+            transform: 'translateY(0)',
           },
         },
-        contained: {
+        containedPrimary: {
+          backgroundColor: '#1A1A1A',
           '&:hover': {
-            boxShadow: 'none',
+            backgroundColor: '#000000',
           },
         },
       },
@@ -94,22 +96,14 @@ const baseTheme: ThemeOptions = {
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRadius: 16,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
+          overflow: 'hidden',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
           '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
-          },
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: 'translateY(-4px)',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)',
           },
         },
       },
@@ -117,140 +111,95 @@ const baseTheme: ThemeOptions = {
     MuiAppBar: {
       styleOverrides: {
         root: {
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
           boxShadow: 'none',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        root: {
-          '& .MuiBackdrop-root': {
-            transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          },
-        },
-        paper: {
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          '&:hover': {
-            transform: 'scale(1.1)',
-          },
-          '&:active': {
-            transform: 'scale(0.95)',
-          },
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
-      },
-    },
-    MuiTab: {
-      styleOverrides: {
-        root: {
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+          color: '#1A1A1A',
         },
       },
     },
   },
 }
 
-// Light theme
 export const lightTheme = createTheme({
   ...baseTheme,
   palette: {
     ...baseTheme.palette,
     mode: 'light',
     background: {
-      default: '#FAFAFA',
-      paper: '#FFFFFF',
+      default: '#FFFFFF',
+      paper: '#FDFDFD',
     },
     text: {
       primary: '#1A1A1A',
-      secondary: '#6B6B6B',
-    },
-    divider: '#E5E5E5',
-  },
-  components: {
-    ...baseTheme.components,
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          border: '1px solid #E5E5E5',
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: 'none',
-          borderBottom: '1px solid #E5E5E5',
-        },
-      },
+      secondary: '#666666',
     },
   },
 })
 
-// Dark theme
 export const darkTheme = createTheme({
   ...baseTheme,
   palette: {
-    ...baseTheme.palette,
     mode: 'dark',
+    primary: {
+      main: '#FFFFFF', // Action items are light
+      dark: '#F0F0F0',
+      light: '#FFFFFF',
+      contrastText: '#1A1A1A',
+    },
+    secondary: {
+      main: '#E67E22', // Saffron
+      dark: '#D35400',
+      light: '#F39C12',
+      contrastText: '#000000', // Better contrast on saffron
+    },
     background: {
-      default: '#121212',
-      paper: '#1E1E1E',
+      default: '#0A0A0A',
+      paper: '#141414',
     },
     text: {
       primary: '#FFFFFF',
-      secondary: '#B0B0B0',
+      secondary: '#B0B0B0', // Darker for better contrast than A0
     },
-    divider: '#333333',
+    divider: 'rgba(255, 255, 255, 0.1)',
   },
   components: {
     ...baseTheme.components,
-    MuiCard: {
+    MuiButtonBase: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-          border: '1px solid #333333',
+          '&.Mui-focusVisible': {
+            outline: '2px solid #E67E22',
+            outlineOffset: '2px',
+          },
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: 'none',
-          borderBottom: '1px solid #333333',
+          backgroundColor: 'rgba(10, 10, 10, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#141414',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
         },
       },
     },
   },
 })
 
-// Status colors for custom use
 export const statusColors = {
-  low: '#10B981',
-  medium: '#F59E0B',
-  high: '#F97316',
-  veryHigh: '#EF4444',
+  low: '#27AE60',
+  medium: '#F1C40F',
+  high: '#E67E22',
+  veryHigh: '#E74C3C',
 }

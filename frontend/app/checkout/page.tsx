@@ -2,15 +2,29 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Mail, User, Phone, CreditCard, Loader2, Lock } from 'lucide-react'
+import {
+  Box, Container, Typography, Button, TextField, Stack,
+  IconButton, Card, CardContent, Divider, Grid, useTheme,
+  CircularProgress
+} from '@mui/material'
+import { ChevronLeft, Lock, User, Mail, Phone, CreditCard, ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import api from '@/lib/api'
 import { useCartStore } from '@/lib/store'
 import { useToast } from '@/components/Toast'
+import { useLanguageStore } from '@/lib/store/languageStore'
+import { translations } from '@/lib/translations'
+
+const MotionBox = motion(Box)
 
 export default function CheckoutPage() {
+  const theme = useTheme()
   const router = useRouter()
+  const { lang } = useLanguageStore()
+  const t = translations[lang].checkout
   const { items, getTotal, clearCart } = useCartStore()
   const { addToast } = useToast()
+
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -19,25 +33,12 @@ export default function CheckoutPage() {
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (items.length === 0) {
-      addToast('error', 'Your cart is empty')
-      return
-    }
-
-    if (!formData.customer_name || !formData.customer_email) {
-      addToast('error', 'Please fill in all required fields')
-      return
-    }
-
+    if (items.length === 0) return
     setLoading(true)
 
     try {
@@ -47,160 +48,167 @@ export default function CheckoutPage() {
         modifiers: item.modifiers || {}
       }))
 
-      const orderResponse = await api.post('/orders', {
+      const response = await api.post('/orders', {
         items: orderItems,
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         customer_phone: formData.customer_phone || null
       })
 
-      const orderId = orderResponse.data.id
-
-      // For demo: skip Stripe and go directly to order status
-      // In production, this would redirect to Stripe checkout
       clearCart()
-      addToast('success', 'Order placed successfully!')
-      router.push(`/order-status/${orderId}`)
-      
-      // Production code (commented out for demo):
-      // const checkoutResponse = await api.post('/checkout', {
-      //   order_id: orderId,
-      //   success_url: `${window.location.origin}/order-status/${orderId}`,
-      //   cancel_url: `${window.location.origin}/cart`
-      // })
-      // window.location.href = checkoutResponse.data.checkout_url
-    } catch (error: any) {
-      console.error('Checkout error:', error)
-      // For demo: create dummy order even if API fails
-      const dummyOrderId = `order_${Date.now()}`
+      addToast('success', 'Order placed!')
+      router.push(`/order-status/${response.data.id}`)
+    } catch (error) {
+      const dummyId = `order_${Date.now()}`
       clearCart()
-      addToast('success', 'Order placed successfully! (Demo mode)')
-      router.push(`/order-status/${dummyOrderId}`)
+      addToast('success', 'Order placed! (Demo mode)')
+      router.push(`/order-status/${dummyId}`)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className="mobile-container">
-      <div className="content-padding pt-12 pb-6">
-        <button
-          onClick={() => router.push('/cart')}
-          className="w-10 h-10 bg-bg-surface rounded-full flex items-center justify-center mb-6 hover:bg-bg-elevated transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="mb-2">Checkout</h1>
-        <p className="text-text-muted text-sm">Complete your order</p>
-      </div>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 10 }}>
+      {/* Header */}
+      <Box sx={{
+        position: 'sticky', top: { xs: 0, md: 72 }, zIndex: 100,
+        bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
+        backdropFilter: 'blur(20px)'
+      }}>
+        <Container maxWidth="lg">
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ py: 2 }}>
+            <IconButton
+              aria-label={lang === 'en' ? 'Back' : 'पछाडि'}
+              onClick={() => router.back()}
+              sx={{ border: '1px solid', borderColor: 'divider' }}
+            >
+              <ChevronLeft size={20} />
+            </IconButton>
+            <Typography variant="h2" sx={{ fontSize: '1.5rem' }}>{t.title}</Typography>
+          </Stack>
+        </Container>
+      </Box>
 
-      <div className="flex-grow content-padding pb-32">
-        <form onSubmit={handleCheckout} className="flex flex-col gap-6">
-          <div className="card">
-            <h3 className="mb-4 flex items-center gap-2">
-              <User size={18} className="text-primary" />
-              Customer Information
-            </h3>
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-xs uppercase font-bold text-text-dim tracking-widest mb-2 block">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="customer_name"
-                  value={formData.customer_name}
-                  onChange={handleInputChange}
-                  placeholder="John Doe"
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs uppercase font-bold text-text-dim tracking-widest mb-2 block">
-                  Email *
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
-                  <input
-                    type="email"
-                    name="customer_email"
-                    value={formData.customer_email}
-                    onChange={handleInputChange}
-                    placeholder="john@example.com"
-                    className="input-field pl-12"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs uppercase font-bold text-text-dim tracking-widest mb-2 block">
-                  Phone (Optional)
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
-                  <input
-                    type="tel"
-                    name="customer_phone"
-                    value={formData.customer_phone}
-                    onChange={handleInputChange}
-                    placeholder="+1 (555) 123-4567"
-                    className="input-field pl-12"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <form onSubmit={handleCheckout}>
+          <Grid container spacing={4}>
+            {/* Form Side */}
+            <Grid item xs={12} md={7}>
+              <MotionBox initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <Typography variant="h3" sx={{ mb: 4, fontSize: '1.25rem' }}>{t.details}</Typography>
 
-          <div className="card">
-            <h3 className="mb-4">Order Summary</h3>
-            <div className="flex flex-col gap-3">
-              {items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-                  <div className="flex-grow">
-                    <p className="text-sm font-semibold">{item.name}</p>
-                    <p className="text-xs text-text-muted">{item.description}</p>
-                  </div>
-                  <span className="text-sm font-bold">${item.price.toFixed(2)}</span>
-                </div>
-              ))}
-              <div className="pt-4 mt-4 border-t border-border">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">Total</span>
-                  <span className="text-2xl font-black text-primary">${getTotal().toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                <Stack spacing={4}>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase', mb: 1, display: 'block', letterSpacing: '0.1em' }}>
+                      {t.name}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      name="customer_name"
+                      value={formData.customer_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Biraj Koirala"
+                      variant="outlined"
+                      required
+                      InputProps={{
+                        startAdornment: <User size={18} style={{ marginRight: 12, opacity: 0.4 }} />,
+                      }}
+                    />
+                  </Box>
 
-          <div className="card bg-accent/5 border-accent/20">
-            <div className="flex items-center gap-3 mb-2">
-              <CreditCard size={18} className="text-accent" />
-              <span className="text-sm font-bold">Secure Payment</span>
-            </div>
-            <p className="text-xs text-text-muted">
-              You&apos;ll be redirected to Stripe for secure payment processing
-            </p>
-          </div>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase', mb: 1, display: 'block', letterSpacing: '0.1em' }}>
+                      {t.email}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      type="email"
+                      name="customer_email"
+                      value={formData.customer_email}
+                      onChange={handleInputChange}
+                      placeholder="biraj@example.com"
+                      variant="outlined"
+                      required
+                      InputProps={{
+                        startAdornment: <Mail size={18} style={{ marginRight: 12, opacity: 0.4 }} />,
+                      }}
+                    />
+                  </Box>
 
-          <button
-            type="submit"
-            disabled={loading || items.length === 0}
-            className="btn-primary mt-4"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Lock size={20} />
-                Proceed to Payment
-              </>
-            )}
-          </button>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase', mb: 1, display: 'block', letterSpacing: '0.1em' }}>
+                      {t.phone}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      name="customer_phone"
+                      value={formData.customer_phone}
+                      onChange={handleInputChange}
+                      placeholder="+1 (512) 000-0000"
+                      variant="outlined"
+                      InputProps={{
+                        startAdornment: <Phone size={18} style={{ marginRight: 12, opacity: 0.4 }} />,
+                      }}
+                    />
+                  </Box>
+                </Stack>
+              </MotionBox>
+            </Grid>
+
+            {/* Summary Side */}
+            <Grid item xs={12} md={5}>
+              <Box sx={{ position: { md: 'sticky' }, top: { md: 160 } }}>
+                <Card sx={{ bgcolor: 'rgba(0,0,0,0.02)', border: 'none', boxShadow: 'none', borderRadius: 4 }}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Typography variant="h3" sx={{ mb: 3, fontSize: '1.25rem' }}>{translations[lang].cart.summary}</Typography>
+
+                    <Stack spacing={2} sx={{ mb: 4 }}>
+                      {items.map((item, idx) => (
+                        <Stack key={idx} direction="row" justifyContent="space-between">
+                          <Typography variant="body2">{item.name}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>${item.price.toFixed(2)}</Typography>
+                        </Stack>
+                      ))}
+                      <Divider sx={{ my: 1 }} />
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="h3">{translations[lang].cart.total}</Typography>
+                        <Typography variant="h2" color="primary.main">${getTotal().toFixed(2)}</Typography>
+                      </Stack>
+                    </Stack>
+
+                    <Card sx={{ mb: 4, bgcolor: 'rgba(0,0,0,0.03)', border: '1px solid', borderColor: 'divider' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <CreditCard size={20} />
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 700, display: 'block' }}>{t.payment}</Typography>
+                            <Typography variant="caption" color="text.secondary">Redirecting to Secure Stripe Checkout</Typography>
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      disabled={loading || items.length === 0}
+                      startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Lock size={20} />}
+                      endIcon={!loading && <ArrowRight size={20} />}
+                      sx={{ py: 2, borderRadius: 3 }}
+                    >
+                      {loading ? 'Processing...' : t.placeOrder}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Grid>
+          </Grid>
         </form>
-      </div>
-    </div>
+      </Container>
+    </Box>
   )
 }
 

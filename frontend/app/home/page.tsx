@@ -1,15 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Box, Container, Typography, Button, Card, CardContent, Grid, Chip, IconButton } from '@mui/material'
-import { MapPin, Clock, ChevronRight, Star, Instagram, Phone } from 'lucide-react'
+import { Box, Container, Typography, Button, Card, CardContent, Grid, Stack, IconButton, useTheme } from '@mui/material'
+import { MapPin, Clock, ChevronRight, Star, Instagram, Phone, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import api from '@/lib/api'
-import BottomNav from '@/components/BottomNav'
-import DarkModeToggle from '@/components/DarkModeToggle'
 import { statusColors } from '@/lib/theme'
+import { useLanguageStore } from '@/lib/store/languageStore'
+import { translations } from '@/lib/translations'
+
+const MotionBox = motion(Box)
+const MotionTypography = motion(Typography)
 
 export default function HomePage() {
+  const theme = useTheme()
+  const { lang } = useLanguageStore()
+  const t = translations[lang].home
+  const ts = translations[lang].status
+
   const [status, setStatus] = useState({
     isOpen: true,
     kitchenLoad: 'LOW',
@@ -30,7 +39,6 @@ export default function HomePage() {
           waitTimeLevel: loadState
         }))
       } catch (error) {
-        // Use default wait time
         setStatus(prev => ({
           ...prev,
           waitTime: '12-15 min',
@@ -60,239 +68,239 @@ export default function HomePage() {
   ]
 
   return (
-    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Status Bar - Sticky */}
-      <Box sx={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 50, 
-        bgcolor: 'background.paper', 
-        borderBottom: '1px solid',
-        borderColor: 'divider'
-      }}>
-        <Container maxWidth={false} sx={{ py: 1.5, px: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ 
-                width: 8, 
-                height: 8, 
-                borderRadius: '50%', 
-                bgcolor: status.isOpen ? statusColors.low : statusColors.veryHigh 
-              }} />
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {status.isOpen ? 'Open' : 'Closed'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Clock size={14} />
-              <Typography variant="caption" sx={{ fontWeight: 600, color: getWaitTimeColor(status.waitTimeLevel) }}>
-                {status.waitTime}
-              </Typography>
-            </Box>
-            <DarkModeToggle />
-          </Box>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+      {/* Hero Section */}
+      <Box
+        sx={{
+          bgcolor: theme.palette.mode === 'light' ? 'primary.main' : 'background.paper',
+          color: 'primary.contrastText',
+          pt: { xs: 8, md: 12 },
+          pb: { xs: 8, md: 12 },
+          px: 3,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={7}>
+              <MotionTypography
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                variant="h1"
+                sx={{
+                  mb: 2,
+                  color: theme.palette.mode === 'light' ? 'primary.contrastText' : 'text.primary',
+                  fontSize: { xs: '3.5rem', md: '5rem' },
+                }}
+              >
+                {t.heroTitle}
+              </MotionTypography>
+              <MotionTypography
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                variant="h6"
+                sx={{
+                  mb: 5,
+                  opacity: 0.8,
+                  fontWeight: 500,
+                  color: theme.palette.mode === 'light' ? 'primary.contrastText' : 'text.primary',
+                  fontSize: { xs: '1.1rem', md: '1.5rem' },
+                  maxWidth: '500px'
+                }}
+              >
+                {t.heroSubtitle}
+              </MotionTypography>
+              <MotionBox
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}
+              >
+                <Button
+                  component={Link}
+                  href="/menu"
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  endIcon={<ArrowUpRight size={20} />}
+                  sx={{ px: 4, py: 2 }}
+                >
+                  {t.orderNow}
+                </Button>
+                <Button
+                  component={Link}
+                  href="/menu"
+                  variant="outlined"
+                  size="large"
+                  sx={{
+                    px: 4, py: 2,
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: 'primary.contrastText',
+                    '&:hover': {
+                      borderColor: 'rgba(255, 255, 255, 0.6)',
+                      bgcolor: 'rgba(255, 255, 255, 0.05)'
+                    }
+                  }}
+                >
+                  {t.viewMenu}
+                </Button>
+              </MotionBox>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
 
-      {/* Hero Section */}
-      <Box 
-        sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'primary.contrastText', 
-          py: 8, 
-          px: 3,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          animation: 'fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
-      >
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography 
-            variant="h1" 
-            sx={{ 
-              mb: 1, 
-              color: 'primary.contrastText',
-              animation: 'slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              animationDelay: '0.1s',
-              animationFillMode: 'both'
-            }}
-          >
-            Everest
-          </Typography>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              mb: 4, 
-              opacity: 0.9,
-              animation: 'slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              animationDelay: '0.2s',
-              animationFillMode: 'both'
-            }}
-          >
-            Authentic Nepalese Street Food
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Button
-              component={Link}
-              href="/menu"
-              variant="contained"
-              color="secondary"
-              fullWidth
-              endIcon={<ChevronRight size={20} />}
-            >
-              Order Takeout
-            </Button>
-            <Button
-              component={Link}
-              href="/menu"
-              variant="outlined"
-              fullWidth
-              sx={{ 
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-                color: 'primary.contrastText',
-                '&:hover': {
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)'
-                }
-              }}
-            >
-              View Menu
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Location & Hours */}
-      <Box sx={{ bgcolor: 'background.paper', py: 3, px: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-          <Box sx={{ 
-            width: 48, 
-            height: 48, 
-            borderRadius: 2, 
-            bgcolor: `${statusColors.medium}15`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <MapPin size={24} color={statusColors.medium} />
-          </Box>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 600 }}>
-              1310 West Howard Lane
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Austin, TX 78728
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Clock size={14} />
-              <Typography variant="body2" color="text.secondary">
-                Open until 12:00 AM
-              </Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary">
-              Pickup only — no dine-in reservations
-            </Typography>
-          </Box>
-        </Box>
+      {/* Info Strip */}
+      <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Container maxWidth="lg">
+          <Grid container sx={{ py: 3 }}>
+            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: { xs: 2, md: 0 } }}>
+              <Box sx={{ color: 'text.secondary' }}><MapPin size={24} /></Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t.address}</Typography>
+                <Typography variant="caption" color="text.secondary">{t.city}</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: { xs: 2, md: 0 } }}>
+              <Box sx={{ color: status.isOpen ? 'success.main' : 'error.main' }}>
+                <Clock size={24} />
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  {status.isOpen ? t.open : t.closed}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">{t.pickupOnly}</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ color: getWaitTimeColor(status.waitTimeLevel) }}>
+                <Utensils size={24} />
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{status.waitTime} {t.waitTime}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {ts[status.waitTimeLevel.toLowerCase() as keyof typeof ts]} Load
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
 
       {/* Popular Items */}
-      <Container maxWidth={false} sx={{ py: 4, px: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h2">Popular Items</Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 6 }}>
+          <Typography variant="h2">{t.popularItems}</Typography>
           <Button
             component={Link}
             href="/menu"
-            endIcon={<ChevronRight size={16} />}
-            sx={{ color: 'secondary.main', fontWeight: 600 }}
+            endIcon={<ChevronRight size={18} />}
+            sx={{ fontWeight: 700, p: 0 }}
           >
-            See All
+            {t.seeAll}
           </Button>
         </Box>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           {popularItems.map((item, idx) => (
-            <Grid item xs={6} key={item.id}>
-              <Card
-                sx={{
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animationDelay: `${idx * 0.1}s`,
-                  animationFillMode: 'both',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 6
-                  }
-                }}
+            <Grid item xs={12} sm={6} md={3} key={item.id}>
+              <MotionBox
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
               >
-                <CardContent>
-                  <Box sx={{ 
-                    aspectRatio: '1', 
-                    bgcolor: 'grey.100', 
-                    borderRadius: 2, 
-                    mb: 1.5,
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Box sx={{
+                    pt: '75%',
+                    position: 'relative',
+                    bgcolor: 'rgba(0,0,0,0.03)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    <Typography variant="h3">🍜</Typography>
+                    <Utensils size={40} strokeWidth={1} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.2 }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }} noWrap>
-                    {item.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ 
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    mb: 1.5
-                  }}>
-                    {item.description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                      ${item.price}
+                  <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h3" sx={{ mb: 1, fontSize: '1.1rem' }}>{item.name}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3, flexGrow: 1, fontSize: '0.85rem' }}>
+                      {item.description}
                     </Typography>
-                    <IconButton
-                      component={Link}
-                      href="/menu"
-                      size="small"
-                      sx={{ 
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        '&:hover': { bgcolor: 'primary.dark' }
-                      }}
-                    >
-                      <ChevronRight size={16} />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="h3" color="primary.main" sx={{ fontWeight: 800 }}>
+                        ${item.price}
+                      </Typography>
+                      <IconButton
+                        component={Link}
+                        href="/menu"
+                        aria-label={t.seeAll}
+                        sx={{
+                          bgcolor: 'primary.main',
+                          color: 'white',
+                          '&:hover': { bgcolor: 'black' }
+                        }}
+                      >
+                        <ChevronRight size={18} />
+                      </IconButton>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </MotionBox>
             </Grid>
           ))}
         </Grid>
       </Container>
 
-      {/* Footer */}
-      <Box sx={{ bgcolor: 'grey.50', py: 4, px: 3, mt: 'auto', mb: 10 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-            <IconButton size="small" sx={{ color: 'text.secondary' }}>
-              <Instagram size={20} />
-            </IconButton>
-            <IconButton size="small" sx={{ color: 'text.secondary' }}>
-              <Star size={20} />
-            </IconButton>
-            <IconButton size="small" component="a" href="tel:+1234567890" sx={{ color: 'text.secondary' }}>
-              <Phone size={20} />
-            </IconButton>
-          </Box>
-          <Typography variant="caption" color="text.secondary" align="center">
-            Powered by Everest Food Truck OS
-          </Typography>
-        </Box>
+      {/* Social Footer */}
+      <Box sx={{ borderTop: '1px solid', borderColor: 'divider', py: 8, bgcolor: 'background.paper' }}>
+        <Container maxWidth="lg">
+          <Stack spacing={4} alignItems="center">
+            <Stack direction="row" spacing={3}>
+              <IconButton aria-label="Instagram" sx={{ border: '1px solid', borderColor: 'divider' }}><Instagram size={20} /></IconButton>
+              <IconButton aria-label="Reviews" sx={{ border: '1px solid', borderColor: 'divider' }}><Star size={20} /></IconButton>
+              <IconButton aria-label="Contact" sx={{ border: '1px solid', borderColor: 'divider' }}><Phone size={20} /></IconButton>
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              {t.footerCredit}
+            </Typography>
+            <Link
+              href="/admin"
+              style={{
+                textDecoration: 'none',
+                fontSize: '0.65rem',
+                color: 'transparent',
+                cursor: 'default',
+                userSelect: 'none'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'inherit')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'transparent')}
+            >
+              •
+            </Link>
+          </Stack>
+        </Container>
       </Box>
-
-      <BottomNav />
     </Box>
+  )
+}
+
+function Utensils(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <path d="M7 2v20" />
+      <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+    </svg>
   )
 }

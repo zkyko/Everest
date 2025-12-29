@@ -2,23 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  Box, Container, Typography, Button, Card, CardContent, Tabs, Tab, 
-  IconButton, Chip, Badge 
+import {
+  Box, Container, Typography, Button, Card, CardContent, Tabs, Tab,
+  IconButton, Chip, Grid, Stack, useTheme, Skeleton
 } from '@mui/material'
-import { Plus, Star, ChevronLeft } from 'lucide-react'
+import { Plus, Star, ChevronLeft, Search, Utensils } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import api from '@/lib/api'
 import { useCartStore } from '@/lib/store'
 import { useToast } from '@/components/Toast'
-import BottomNav from '@/components/BottomNav'
 import MenuItemModal from '@/components/MenuItemModal'
-import DarkModeToggle from '@/components/DarkModeToggle'
-import { statusColors } from '@/lib/theme'
+import { useLanguageStore } from '@/lib/store/languageStore'
+import { translations } from '@/lib/translations'
+
+const MotionBox = motion(Box)
+const MotionGrid = motion(Grid)
 
 export default function MenuPage() {
+  const theme = useTheme()
   const router = useRouter()
+  const { lang } = useLanguageStore()
+  const t = translations[lang].menu
   const { addItem } = useCartStore()
   const { addToast } = useToast()
+
   const [menu, setMenu] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState(0)
@@ -28,68 +35,49 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       setLoading(true)
-      // Show fallback data immediately for better UX
       const fallbackData = [
-          {
-            id: '1',
-            name: 'Nepalese Food Items',
-            items: [
-              { id: '1', name: 'Chicken Chow Mein', description: '6 ounces of spaghetti noodles onion chopped garlic ginger fresh vegetables, 3 ounces of chicken customer choice.', price: 12.99, is_available: true },
-              { id: '2', name: 'Chicken Momo', description: 'Chicken dumplings.', price: 12.99, is_available: true },
-              { id: '3', name: 'Chicken Jhol Momo', description: 'Traditional Nepalese dumplings filled with chicken in a flavorful broth.', price: 12.99, is_available: true },
-              { id: '4', name: 'Veg Momos', description: 'Steamed dumplings filled with vegetables.', price: 11.99, is_available: true },
-              { id: '5', name: 'Mix Buff Sukuti & Fried Chicken Momo (5 pcs)', description: 'Buff suki chow mein with 5 pieces of fried chicken momo.', price: 15.99, is_available: true },
-            ]
-          },
-          {
-            id: '2',
-            name: 'Indian Food',
-            items: [
-              { id: '6', name: 'Chicken Curry', description: 'Farm fresh chicken, made with authentic Nepali style, and chef recipe.', price: 13.99, is_available: true },
-              { id: '7', name: 'Paneer Tikka Masala', description: 'Paneer marinated with authentic herbs, yogurt, spices, and a vegan dish.', price: 13.00, is_available: true },
-              { id: '8', name: 'Goat Curry with Side Basmati Rice', description: 'Tender goat in a rich and flavorful curry served with basmati rice.', price: 15.99, is_available: true },
-            ]
-          },
-          {
-            id: '3',
-            name: 'Snacks',
-            items: [
-              { id: '9', name: 'Chatpate', description: 'Nepali amilo piro chat pat.', price: 6.99, is_available: true },
-              { id: '10', name: 'Samosa', description: 'Nepali and Indian is a famous vegan dish, is come with mint chutney.', price: 5.99, is_available: true },
-            ]
-          },
-          {
-            id: '4',
-            name: 'Drinks',
-            items: [
-              { id: '11', name: 'Chiya', description: 'Himalayan tea, milk cloves ginger black paper cardamom cinnamon, and sugar.', price: 3.50, is_available: true },
-            ]
-          }
-        ]
-      
-      // Set fallback data immediately
+        {
+          id: '1',
+          name: lang === 'en' ? 'Nepalese Food' : 'नेपाली खाना',
+          items: [
+            { id: '1', name: 'Chicken Chow Mein', description: '6 oz noodles, fresh vegetables, 3 oz chicken', price: 12.99, is_available: true },
+            { id: '2', name: 'Chicken Momo', description: 'Traditional Nepalese dumplings', price: 12.99, is_available: true },
+            { id: '3', name: 'Chicken Jhol Momo', description: 'Dumplings in a flavorful broth', price: 12.99, is_available: true },
+            { id: '4', name: 'Veg Momos', description: 'Steamed vegetable dumplings', price: 11.99, is_available: true },
+          ]
+        },
+        {
+          id: '2',
+          name: lang === 'en' ? 'Indian Food' : 'भारतीय खाना',
+          items: [
+            { id: '6', name: 'Chicken Curry', description: 'Authentic Nepali style chicken curry', price: 13.99, is_available: true },
+            { id: '7', name: 'Paneer Tikka Masala', description: 'Marinated paneer in spiced gravy', price: 13.00, is_available: true },
+          ]
+        },
+        {
+          id: '3',
+          name: lang === 'en' ? 'Snacks' : 'खाजा',
+          items: [
+            { id: '9', name: 'Chatpate', description: 'Spicy and sour Nepali street snack', price: 6.99, is_available: true },
+            { id: '10', name: 'Samosa', description: 'Crispy pastry with savory filling', price: 5.99, is_available: true },
+          ]
+        }
+      ]
+
       setMenu(fallbackData)
       setLoading(false)
 
-      // Then try to fetch from API in background
       try {
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 2000)
-        )
-        const response = await Promise.race([
-          api.get('/menu'),
-          timeoutPromise
-        ]) as any
+        const response = await api.get('/menu')
         if (response.data && response.data.categories && response.data.categories.length > 0) {
           setMenu(response.data.categories)
         }
       } catch (e) {
-        console.log('Using fallback menu data:', e)
-        // Already using fallback data, no need to update
+        console.log('Using fallback menu data')
       }
     }
     fetchMenu()
-  }, [])
+  }, [lang])
 
   const handleItemClick = (item: any) => {
     if (!item.is_available) {
@@ -101,221 +89,164 @@ export default function MenuPage() {
   }
 
   const handleAddToCart = (item: any, modifiers: Record<string, string[]>) => {
-    // Calculate total price with modifiers
-    let totalPrice = parseFloat(item.price || 0)
-    
-    // Add modifier prices (simplified - in real app, fetch from API)
-    const defaultModifiers = [
-      {
-        id: 'spice',
-        options: [
-          { id: 'mild', price_modifier: 0 },
-          { id: 'medium', price_modifier: 0 },
-          { id: 'hot', price_modifier: 0 },
-          { id: 'extra-hot', price_modifier: 0 },
-        ],
-      },
-      {
-        id: 'extras',
-        options: [
-          { id: 'extra-rice', price_modifier: 2.00 },
-          { id: 'extra-meat', price_modifier: 3.00 },
-          { id: 'extra-veggies', price_modifier: 1.50 },
-          { id: 'extra-sauce', price_modifier: 0.50 },
-        ],
-      },
-    ]
-
-    Object.entries(modifiers).forEach(([groupId, optionIds]) => {
-      defaultModifiers.forEach((group) => {
-        if (group.id === groupId) {
-          optionIds.forEach((optionId) => {
-            const option = group.options.find((opt) => opt.id === optionId)
-            if (option) {
-              totalPrice += parseFloat(String(option.price_modifier || 0))
-            }
-          })
-        }
-      })
-    })
-
-    const itemWithModifiers = {
-      ...item,
-      price: totalPrice,
-      modifiers,
-      originalPrice: item.price,
-    }
-
-    addItem(itemWithModifiers)
+    addItem({ ...item, modifiers })
     addToast('success', 'Added to cart!')
   }
 
-  if (loading) {
-    return (
-      <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography color="text.secondary">Loading menu...</Typography>
-      </Box>
-    )
-  }
-
   return (
-    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Header */}
-      <Box sx={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 40, 
-        bgcolor: 'background.paper', 
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 10 }}>
+      {/* Search & Category Header */}
+      <Box sx={{
+        position: 'sticky',
+        top: { xs: 0, md: 72 },
+        zIndex: 1000,
+        bgcolor: 'background.paper',
         borderBottom: '1px solid',
-        borderColor: 'divider'
+        borderColor: 'divider',
+        backdropFilter: 'blur(20px)',
       }}>
-        <Container maxWidth={false} sx={{ py: 2, px: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <IconButton
-              onClick={() => router.back()}
-              sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}
-            >
-              <ChevronLeft size={20} />
-            </IconButton>
-            <Typography variant="h1" sx={{ flexGrow: 1 }}>Menu</Typography>
-            <DarkModeToggle />
-          </Box>
+        <Container maxWidth="lg">
+          <Box sx={{ py: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+              <IconButton
+                aria-label={lang === 'en' ? 'Back' : 'पछाडि'}
+                onClick={() => router.back()}
+                sx={{ border: '1px solid', borderColor: 'divider' }}
+              >
+                <ChevronLeft size={20} />
+              </IconButton>
+              <Typography variant="h2" sx={{ flexGrow: 1, fontSize: '1.5rem' }}>{t.categories}</Typography>
+              <IconButton sx={{ border: '1px solid', borderColor: 'divider' }}>
+                <Search size={20} />
+              </IconButton>
+            </Stack>
 
-          {/* Category Tabs */}
-          <Tabs
-            value={activeCategory}
-            onChange={(_, newValue) => setActiveCategory(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              '& .MuiTab-root': {
-                minWidth: 'auto',
-                px: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-              },
-            }}
-          >
-            {menu.map((cat) => (
-              <Tab key={cat.id} label={cat.name} />
-            ))}
-          </Tabs>
+            <Tabs
+              value={activeCategory}
+              onChange={(_, v) => setActiveCategory(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+                '& .MuiTab-root': {
+                  minWidth: 'auto',
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&.Mui-selected': { color: 'primary.main' }
+                }
+              }}
+            >
+              {menu.map((cat) => <Tab key={cat.id} label={cat.name} />)}
+            </Tabs>
+          </Box>
         </Container>
       </Box>
 
-      {/* Menu Items */}
-      <Container 
-        maxWidth={false} 
-        sx={{ 
-          py: 3, 
-          px: 3, 
-          pb: 20,
-          scrollBehavior: 'smooth',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch'
-        }}
-      >
-        {menu[activeCategory]?.items && menu[activeCategory].items.length > 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {menu[activeCategory].items.map((item: any, idx: number) => (
-              <Card 
-                key={item.id}
-                sx={{ 
-                  cursor: item.is_available ? 'pointer' : 'default',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animationDelay: `${idx * 0.05}s`,
-                  animationFillMode: 'both',
-                  '&:hover': item.is_available ? { 
-                    transform: 'translateY(-4px)',
-                    boxShadow: 6
-                  } : {},
-                  '&:active': item.is_available ? {
-                    transform: 'translateY(-1px) scale(0.98)'
-                  } : {}
-                }}
-                onClick={() => handleItemClick(item)}
-              >
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {item.name}
-                        </Typography>
-                        {idx < 2 && (
-                          <Chip
-                            icon={<Star size={12} fill="currentColor" />}
-                            label="Popular"
-                            size="small"
-                            sx={{ 
-                              height: 20,
-                              fontSize: '0.7rem',
-                              color: 'secondary.main',
-                              bgcolor: `${statusColors.medium}15`
+      {/* Menu Grid */}
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <AnimatePresence mode="wait">
+          <MotionGrid
+            key={activeCategory}
+            container
+            spacing={3}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <Grid item xs={12} sm={6} md={4} key={i}>
+                  <Skeleton variant="rectangular" height={180} sx={{ borderRadius: 4 }} />
+                </Grid>
+              ))
+            ) : (
+              menu[activeCategory]?.items?.map((item: any, idx: number) => (
+                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                  <MotionBox
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                    <Card
+                      onClick={() => handleItemClick(item)}
+                      sx={{
+                        cursor: item.is_available ? 'pointer' : 'default',
+                        opacity: item.is_available ? 1 : 0.6,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <CardContent sx={{ p: 3, flexGrow: 1 }}>
+                        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                          <Box sx={{
+                            width: 64, height: 64,
+                            borderRadius: 3,
+                            bgcolor: 'rgba(0,0,0,0.03)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            <CustomUtensils size={28} strokeWidth={1.5} style={{ opacity: 0.3 }} />
+                          </Box>
+                          <Box sx={{ flexGrow: 1 }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                              <Typography variant="h3" sx={{ fontSize: '1.05rem', mb: 0.5 }}>{item.name}</Typography>
+                              <Typography variant="h3" color="primary.main" sx={{ fontWeight: 800 }}>
+                                ${parseFloat(item.price).toFixed(2)}
+                              </Typography>
+                            </Stack>
+                            <Typography variant="body2" color="text.secondary" sx={{
+                              fontSize: '0.8rem',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden'
+                            }}>
+                              {item.description}
+                            </Typography>
+                          </Box>
+                        </Stack>
+
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Stack direction="row" spacing={1}>
+                            {idx < 1 && (
+                              <Chip
+                                label="Popular"
+                                size="small"
+                                icon={<Star size={12} />}
+                                sx={{ height: 24, fontSize: '0.7rem', fontWeight: 600 }}
+                              />
+                            )}
+                            {!item.is_available && (
+                              <Chip label="Sold Out" size="small" color="error" sx={{ height: 24, fontSize: '0.7rem' }} />
+                            )}
+                          </Stack>
+                          <IconButton
+                            disabled={!item.is_available}
+                            sx={{
+                              bgcolor: 'primary.main', color: 'white',
+                              width: 36, height: 36,
+                              '&:hover': { bgcolor: 'black' }
                             }}
-                          />
-                        )}
-                        {!item.is_available && (
-                          <Chip
-                            label="Sold Out"
-                            size="small"
-                            color="error"
-                            sx={{ height: 20, fontSize: '0.7rem' }}
-                          />
-                        )}
-                      </Box>
-                      {item.description && (
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary" 
-                          sx={{ 
-                            mb: 1.5,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}
-                        >
-                          {item.description}
-                        </Typography>
-                      )}
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                          ${parseFloat(item.price).toFixed(2)}
-                        </Typography>
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleItemClick(item)
-                          }}
-                          disabled={!item.is_available}
-                          sx={{ 
-                            bgcolor: 'primary.main',
-                            color: 'primary.contrastText',
-                            '&:hover': { bgcolor: 'primary.dark' },
-                            '&.Mui-disabled': { bgcolor: 'grey.300' }
-                          }}
-                        >
-                          <Plus size={20} />
-                        </IconButton>
-                      </Box>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        ) : (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography color="text.secondary">No items in this category</Typography>
-          </Box>
-        )}
+                          >
+                            <Plus size={18} />
+                          </IconButton>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </MotionBox>
+                </Grid>
+              ))
+            )}
+          </MotionGrid>
+        </AnimatePresence>
       </Container>
 
-      <BottomNav />
-
-      {/* Menu Item Modal */}
+      {/* Item Modal */}
       <MenuItemModal
         open={modalOpen}
         item={selectedItem}
@@ -326,5 +257,26 @@ export default function MenuPage() {
         onAddToCart={handleAddToCart}
       />
     </Box>
+  )
+}
+
+function CustomUtensils(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <path d="M7 2v20" />
+      <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+    </svg>
   )
 }

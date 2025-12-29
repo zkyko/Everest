@@ -17,8 +17,11 @@ import {
   IconButton,
   Chip,
   Divider,
+  Stack,
 } from '@mui/material'
-import { X, Plus, Minus } from 'lucide-react'
+import { X, Plus, Minus, ShoppingBag } from 'lucide-react'
+import { useLanguageStore } from '@/lib/store/languageStore'
+import { translations } from '@/lib/translations'
 
 interface ModifierGroup {
   id: string
@@ -52,37 +55,37 @@ interface MenuItemModalProps {
 }
 
 export default function MenuItemModal({ open, item, onClose, onAddToCart }: MenuItemModalProps) {
+  const { lang } = useLanguageStore()
+  const tm = translations[lang].menu
   const [quantity, setQuantity] = useState(1)
   const [selectedModifiers, setSelectedModifiers] = useState<Record<string, string[]>>({})
 
   if (!item) return null
 
-  // Default modifier groups for demo (spice level, etc.)
   const defaultModifiers: ModifierGroup[] = [
     {
       id: 'spice',
-      name: 'Spice Level',
+      name: lang === 'en' ? 'Spice Level' : 'मसाला स्तर',
       is_required: true,
       min_selections: 1,
       max_selections: 1,
       options: [
-        { id: 'mild', name: 'Mild', price_modifier: 0 },
-        { id: 'medium', name: 'Medium', price_modifier: 0 },
-        { id: 'hot', name: 'Hot', price_modifier: 0 },
-        { id: 'extra-hot', name: 'Extra Hot', price_modifier: 0 },
+        { id: 'mild', name: lang === 'en' ? 'Mild' : 'न्यून', price_modifier: 0 },
+        { id: 'medium', name: lang === 'en' ? 'Medium' : 'मध्यम', price_modifier: 0 },
+        { id: 'hot', name: lang === 'en' ? 'Hot' : 'पिरो', price_modifier: 0 },
+        { id: 'extra-hot', name: lang === 'en' ? 'Extra Hot' : 'धेरै पिरो', price_modifier: 0 },
       ],
     },
     {
       id: 'extras',
-      name: 'Add-ons',
+      name: lang === 'en' ? 'Add-ons' : 'थप परिकार',
       is_required: false,
       min_selections: 0,
       max_selections: 5,
       options: [
-        { id: 'extra-rice', name: 'Extra Rice', price_modifier: 2.00 },
-        { id: 'extra-meat', name: 'Extra Meat', price_modifier: 3.00 },
-        { id: 'extra-veggies', name: 'Extra Vegetables', price_modifier: 1.50 },
-        { id: 'extra-sauce', name: 'Extra Sauce', price_modifier: 0.50 },
+        { id: 'extra-rice', name: lang === 'en' ? 'Extra Rice' : 'थप भात', price_modifier: 2.00 },
+        { id: 'extra-meat', name: lang === 'en' ? 'Extra Meat' : 'थप मासु', price_modifier: 3.00 },
+        { id: 'extra-veggies', name: lang === 'en' ? 'Extra Vegetables' : 'थप तरकारी', price_modifier: 1.50 },
       ],
     },
   ]
@@ -93,199 +96,184 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     setSelectedModifiers((prev) => {
       const current = prev[groupId] || []
       if (isMultiple) {
-        // Toggle selection for multiple choice
         const newSelection = current.includes(optionId)
           ? current.filter((id) => id !== optionId)
           : [...current, optionId]
         return { ...prev, [groupId]: newSelection }
       } else {
-        // Single selection
         return { ...prev, [groupId]: [optionId] }
       }
     })
   }
 
   const calculateTotal = () => {
-    let total = parseFloat(item.price || 0) * quantity
-    Object.values(selectedModifiers).forEach((optionIds) => {
-      modifierGroups.forEach((group: ModifierGroupLike) => {
-        optionIds.forEach((optionId) => {
-          const option = group.options.find((opt: ModifierOption) => opt.id === optionId)
-          if (option) {
-            total += parseFloat(String(option.price_modifier || 0)) * quantity
-          }
+    let total = parseFloat(item.price || 0)
+    Object.entries(selectedModifiers).forEach(([groupId, optionIds]) => {
+      const group = modifierGroups.find(g => g.id === groupId)
+      if (group) {
+        optionIds.forEach(id => {
+          const opt = group.options.find(o => o.id === id)
+          if (opt) total += opt.price_modifier
         })
-      })
+      }
     })
-    return total
+    return total * quantity
   }
 
   const handleAddToCart = () => {
-    // Validate required modifiers
-    for (const group of modifierGroups) {
-      if (group.is_required && (!selectedModifiers[group.id] || selectedModifiers[group.id].length === 0)) {
-        return // Don't add if required modifier is missing
-      }
-    }
     onAddToCart(item, selectedModifiers)
     onClose()
     setQuantity(1)
     setSelectedModifiers({})
   }
 
-  const canAddToCart = modifierGroups.every((group: ModifierGroupLike) => (
-    !group.is_required || (selectedModifiers[group.id] && selectedModifiers[group.id].length > 0)
-  ))
+  const canAddToCart = modifierGroups.every(g => !g.is_required || (selectedModifiers[g.id] && selectedModifiers[g.id].length > 0))
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
       fullWidth
+      maxWidth="xs"
       PaperProps={{
-        sx: {
-          borderRadius: 3,
-          maxHeight: '90vh',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
-      }}
-      TransitionProps={{
-        timeout: 300,
+        sx: { borderRadius: 4, bgcolor: 'background.paper', backgroundImage: 'none' }
       }}
     >
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h2">{item.name}</Typography>
-          <IconButton onClick={onClose} size="small">
-            <X size={20} />
-          </IconButton>
+      <Box sx={{ position: 'relative' }}>
+        <IconButton
+          onClick={onClose}
+          aria-label={lang === 'en' ? 'Close' : 'बन्द गर्नुहोस्'}
+          sx={{
+            position: 'absolute', right: 16, top: 16, zIndex: 1,
+            bgcolor: 'rgba(0,0,0,0.05)', '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+          }}
+        >
+          <X size={20} />
+        </IconButton>
+
+        <Box sx={{ pt: 6, px: 3, pb: 2 }}>
+          <Typography variant="h2" sx={{ mb: 1, fontSize: '1.5rem' }}>{item.name}</Typography>
+          <Typography variant="body2" color="text.secondary">{item.description}</Typography>
         </Box>
-      </DialogTitle>
 
-      <DialogContent dividers>
-        {item.description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {item.description}
-          </Typography>
-        )}
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          <Stack spacing={4}>
+            {modifierGroups.map((group) => (
+              <Box key={group.id}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {group.name}
+                  </Typography>
+                  {group.is_required && (
+                    <Chip label={lang === 'en' ? 'Required' : 'अनिवार्य'} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+                  )}
+                </Stack>
 
-        {/* Modifier Groups */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {modifierGroups.map((group: ModifierGroupLike) => (
-            <FormControl key={group.id} required={group.is_required}>
-              <FormLabel sx={{ mb: 1, fontWeight: 600 }}>
-                {group.name}
-                {group.is_required && <Chip label="Required" size="small" sx={{ ml: 1, height: 20 }} />}
-              </FormLabel>
-              {(group.max_selections ?? 1) === 1 ? (
-                // Single selection (Radio)
-                <RadioGroup
-                  value={selectedModifiers[group.id]?.[0] || ''}
-                  onChange={(e) => handleModifierChange(group.id, e.target.value, false)}
-                >
-                  {group.options.map((option: ModifierOption) => (
-                    <FormControlLabel
-                      key={option.id}
-                      value={option.id}
-                      control={<Radio />}
-                      label={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', ml: 1 }}>
-                          <Typography>{option.name}</Typography>
+                {(group.max_selections ?? 1) === 1 ? (
+                  <RadioGroup
+                    value={selectedModifiers[group.id]?.[0] || ''}
+                    onChange={(e) => handleModifierChange(group.id, e.target.value, false)}
+                  >
+                    <Stack spacing={1}>
+                      {group.options.map((option) => (
+                        <Box
+                          key={option.id}
+                          sx={{
+                            display: 'flex', alignItems: 'center', p: 1,
+                            borderRadius: 2, border: '1px solid',
+                            borderColor: selectedModifiers[group.id]?.[0] === option.id ? 'primary.main' : 'divider',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <FormControlLabel
+                            value={option.id}
+                            control={<Radio size="small" />}
+                            label={
+                              <Stack direction="row" justifyContent="space-between" sx={{ width: '100%', minWidth: '200px' }}>
+                                <Typography variant="body2">{option.name}</Typography>
+                                {option.price_modifier > 0 && (
+                                  <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+                                    +${option.price_modifier.toFixed(2)}
+                                  </Typography>
+                                )}
+                              </Stack>
+                            }
+                            sx={{ m: 0, width: '100%' }}
+                          />
+                        </Box>
+                      ))}
+                    </Stack>
+                  </RadioGroup>
+                ) : (
+                  <Stack spacing={1}>
+                    {group.options.map((option) => {
+                      const active = selectedModifiers[group.id]?.includes(option.id)
+                      return (
+                        <Box
+                          key={option.id}
+                          onClick={() => handleModifierChange(group.id, option.id, true)}
+                          sx={{
+                            p: 2, borderRadius: 2, border: '1px solid',
+                            borderColor: active ? 'primary.main' : 'divider',
+                            bgcolor: active ? 'rgba(0,0,0,0.02)' : 'transparent',
+                            cursor: 'pointer', transition: 'all 0.2s ease',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                          }}
+                        >
+                          <Typography variant="body2">{option.name}</Typography>
                           {option.price_modifier > 0 && (
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
                               +${option.price_modifier.toFixed(2)}
                             </Typography>
                           )}
                         </Box>
-                      }
-                    />
-                  ))}
-                </RadioGroup>
-              ) : (
-                // Multiple selection (Checkboxes)
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {group.options.map((option: ModifierOption) => {
-                    const isSelected = selectedModifiers[group.id]?.includes(option.id) || false
-                    return (
-                      <Box
-                        key={option.id}
-                        onClick={() => handleModifierChange(group.id, option.id, true)}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          p: 1.5,
-                          borderRadius: 2,
-                          border: '2px solid',
-                          borderColor: isSelected ? 'primary.main' : 'divider',
-                          bgcolor: isSelected ? 'action.selected' : 'transparent',
-                          cursor: 'pointer',
-                          '&:hover': {
-                            borderColor: 'primary.main',
-                            bgcolor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <Typography>{option.name}</Typography>
-                        {option.price_modifier > 0 && (
-                          <Typography variant="body2" color="text.secondary">
-                            +${option.price_modifier.toFixed(2)}
-                          </Typography>
-                        )}
-                      </Box>
-                    )
-                  })}
-                </Box>
-              )}
-            </FormControl>
-          ))}
-        </Box>
+                      )
+                    })}
+                  </Stack>
+                )}
+              </Box>
+            ))}
 
-        <Divider sx={{ my: 3 }} />
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', mb: 2 }}>
+                {lang === 'en' ? 'Quantity' : 'मात्रा'}
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={3}>
+                <IconButton
+                  aria-label={lang === 'en' ? 'Decrease quantity' : 'मात्रा घटाउनुहोस्'}
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  sx={{ border: '1px solid', borderColor: 'divider' }}
+                >
+                  <Minus size={18} />
+                </IconButton>
+                <Typography variant="h3" sx={{ minWidth: 20, textAlign: 'center' }}>{quantity}</Typography>
+                <IconButton
+                  aria-label={lang === 'en' ? 'Increase quantity' : 'मात्रा बढाउनुहोस्'}
+                  onClick={() => setQuantity(q => q + 1)}
+                  sx={{ border: '1px solid', borderColor: 'divider' }}
+                >
+                  <Plus size={18} />
+                </IconButton>
+              </Stack>
+            </Box>
+          </Stack>
+        </DialogContent>
 
-        {/* Quantity Selector */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h3">Quantity</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              size="small"
-            >
-              <Minus size={18} />
-            </IconButton>
-            <Typography variant="h4" sx={{ minWidth: 40, textAlign: 'center' }}>
-              {quantity}
-            </Typography>
-            <IconButton onClick={() => setQuantity(quantity + 1)} size="small">
-              <Plus size={18} />
-            </IconButton>
-          </Box>
-        </Box>
-      </DialogContent>
-
-      <DialogActions sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Total
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              ${calculateTotal().toFixed(2)}
-            </Typography>
-          </Box>
+        <DialogActions sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider' }}>
           <Button
+            fullWidth
             variant="contained"
+            size="large"
             onClick={handleAddToCart}
             disabled={!canAddToCart}
-            startIcon={<Plus size={18} />}
-            size="large"
+            startIcon={<ShoppingBag size={20} />}
+            sx={{ py: 2, borderRadius: 3, justifyContent: 'space-between' }}
           >
-            Add to Cart
+            <Box component="span">{tm.addToCart}</Box>
+            <Box component="span">${calculateTotal().toFixed(2)}</Box>
           </Button>
-        </Box>
-      </DialogActions>
+        </DialogActions>
+      </Box>
     </Dialog>
   )
 }
