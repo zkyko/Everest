@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { supabasePublic } from '@/lib/supabase-public'
 
 export async function GET() {
   try {
-    const supabase = createServerClient()
+    const supabase = supabasePublic
     
     // Fetch menu categories with items
     const { data: categories, error: categoriesError } = await supabase

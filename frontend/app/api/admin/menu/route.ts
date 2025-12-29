@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { verifyToken } from '@/lib/auth'
 
 // Helper to verify admin token
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const supabase = createServerClient()
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
     const itemId = searchParams.get('id')
     const action = searchParams.get('action') || 'soldout'

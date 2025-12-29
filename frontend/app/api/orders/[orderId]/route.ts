@@ -1,14 +1,14 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { supabasePublic } from '@/lib/supabase-public'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const supabase = createServerClient()
+    const supabase = supabasePublic
     const { orderId } = params
     
     if (!orderId) {

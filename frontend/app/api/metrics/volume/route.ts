@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
-    const supabase = createServerClient()
+    const supabase = supabaseAdmin
     
     // Get active orders (NEW and ACCEPTED)
     const { data: activeOrders, error: ordersError } = await supabase
