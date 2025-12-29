@@ -138,7 +138,7 @@ export default function MenuPage() {
                 </Grid>
               ))
             ) : (
-              menu[activeCategory]?.items?.map((item: any, idx: number) => (
+              menu[activeCategory]?.menu_items?.map((item: any, idx: number) => (
                 <Grid item xs={12} sm={6} md={4} key={item.id}>
                   <MotionBox
                     initial={{ opacity: 0, y: 20 }}
