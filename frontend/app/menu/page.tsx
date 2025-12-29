@@ -113,7 +113,7 @@ export default function MenuPage() {
                 }
               }}
             >
-              {menu.map((cat) => <Tab key={cat.id} label={cat.name} />)}
+              {menu?.map((cat) => <Tab key={cat.id} label={cat.name} />) || []}
             </Tabs>
           </Box>
         </Container>
@@ -137,8 +137,8 @@ export default function MenuPage() {
                   <Skeleton variant="rectangular" height={180} sx={{ borderRadius: 4 }} />
                 </Grid>
               ))
-            ) : (
-              menu[activeCategory]?.menu_items?.map((item: any, idx: number) => (
+            ) : menu[activeCategory]?.menu_items && menu[activeCategory].menu_items.length > 0 ? (
+              menu[activeCategory].menu_items.map((item: any, idx: number) => (
                 <Grid item xs={12} sm={6} md={4} key={item.id}>
                   <MotionBox
                     initial={{ opacity: 0, y: 20 }}
@@ -215,6 +215,14 @@ export default function MenuPage() {
                   </MotionBox>
                 </Grid>
               ))
+            ) : (
+              <Grid item xs={12}>
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <Typography variant="h6" color="text.secondary">
+                    No items available in this category
+                  </Typography>
+                </Box>
+              </Grid>
             )}
           </MotionGrid>
         </AnimatePresence>
