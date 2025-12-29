@@ -10,8 +10,12 @@ async function verifyAdmin(request: NextRequest) {
   }
   
   const token = authHeader.substring(7)
-  const payload = verifyToken(token)
-  return payload
+  try {
+    const payload = await verifyToken(token)
+    return payload
+  } catch {
+    return null
+  }
 }
 
 // GET /api/admin/orders - List orders
@@ -61,67 +65,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
-// PATCH /api/admin/orders/[id]/status - Update order status
-export async function PATCH(request: NextRequest) {
-  try {
-    const auth = await verifyAdmin(request)
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-    
-    const supabase = createServerClient()
-    const body = await request.json()
-    const { searchParams } = new URL(request.url)
-    const orderId = searchParams.get('id')
-    
-    if (!orderId) {
-      return NextResponse.json(
-        { error: 'Order ID is required' },
-        { status: 400 }
-      )
-    }
-    
-    if (!body.status) {
-      return NextResponse.json(
-        { error: 'Status is required' },
-        { status: 400 }
-      )
-    }
-    
-    const validStatuses = ['NEW', 'ACCEPTED', 'READY', 'COMPLETED', 'CANCELLED']
-    if (!validStatuses.includes(body.status)) {
-      return NextResponse.json(
-        { error: 'Invalid status' },
-        { status: 400 }
-      )
-    }
-    
-    const { data: order, error } = await supabase
-      .from('orders')
-      .update({ status: body.status })
-      .eq('id', orderId)
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Error updating order:', error)
-      return NextResponse.json(
-        { error: 'Failed to update order' },
-        { status: 500 }
-      )
-    }
-    
-    return NextResponse.json(order)
-  } catch (error: any) {
-    console.error('Admin orders update error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
