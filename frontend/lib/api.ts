@@ -1,13 +1,9 @@
 import axios from 'axios'
 
-// Use environment variable for API URL, falls back to localhost for local development
+// Use relative API routes (Next.js API routes)
 const getApiBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    // In browser: use environment variable or relative path
-    return process.env.NEXT_PUBLIC_API_URL || '/api'
-  }
-  // Server-side: use environment variable or localhost
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+  // Always use relative path for Next.js API routes
+  return '/api'
 }
 
 const api = axios.create({

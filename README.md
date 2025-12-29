@@ -13,17 +13,15 @@ You can copy-paste this directly as `README.md`.
 
 # 🍔 Food Truck OS — SaaS-ready Architecture (Single-Tenant Demo)
 
-**Food Truck OS** is a SaaS-ready, backend-first platform designed to power online ordering, takeout payments, real-time kitchen operations, and activity volume insights for food trucks and small food businesses.
+**Everest Food Truck** is a modern online ordering system for food trucks, built with Next.js and Supabase. Customers can browse the menu, place orders, make payments, and track order status in real-time.
 
-## 🔑 Key Principle
+## 🔑 Key Features
 
-**This demo is configured for a single tenant (Everest Food Truck), but the backend is fully multi-tenant and SaaS-ready by design.**
-
-This means the system maintains complete multi-tenant architecture internally (tenant_id on all models, tenant middleware, tenant-aware services) while being configured as a single-tenant demo for clarity and focus.
-
-This repository focuses on building a **production-grade backend skeleton** with a **minimal, replaceable frontend**, allowing the visual layer and brand identity to be redesigned later in Figma **without touching business logic**.
-
-The system is intentionally architected so that **one backend can serve many food trucks**. The demo is configured for a single tenant (Everest Food Truck, slug: "everest") but can support additional tenants without architectural changes.
+- **Simple Architecture**: Single Next.js app with API routes (no separate backend)
+- **Managed Database**: Supabase PostgreSQL (no database management needed)
+- **Easy Deployment**: Single Vercel deployment
+- **Full Ordering Flow**: Menu → Cart → Checkout → Payment → Order Tracking
+- **Admin Dashboard**: Kitchen staff can manage orders and menu
 
 ---
 
@@ -52,12 +50,10 @@ The system is intentionally architected so that **one backend can serve many foo
 
 ## 🧠 Product Philosophy
 
-* **Backend first**
-* **Multi-tenant by default**
-* **Frontend is replaceable**
-* **Business logic is permanent**
-* **Simple beats clever**
-* **Real systems > mockups**
+* **Simple and focused**: Single food truck, single deployment
+* **Modern stack**: Next.js, Supabase, Stripe
+* **Easy to maintain**: No complex backend infrastructure
+* **Production ready**: Real payments, real orders, real data
 
 ---
 
@@ -65,33 +61,26 @@ The system is intentionally architected so that **one backend can serve many foo
 
 | Layer               | Technology                                   |
 | ------------------- | -------------------------------------------- |
-| Frontend            | Minimal Next.js (or static UI)               |
-| Backend             | **Python FastAPI**                           |
-| Database            | PostgreSQL                                   |
-| ORM                 | SQLAlchemy 2.0                               |
-| Migrations          | Alembic                                      |
+| Frontend            | Next.js 14 (App Router)                      |
+| API                 | Next.js API Routes                           |
+| Database            | Supabase (PostgreSQL)                        |
 | Payments            | Stripe Checkout + Webhooks                   |
-| Auth (Admin)        | JWT (tenant-scoped)                          |
-| Realtime (optional) | WebSockets                                   |
-| Deployment          | Vercel (frontend), Fly.io / Render (backend) |
+| Auth (Admin)        | JWT                                          |
+| Deployment          | Vercel (single deployment)                   |
 | Dev Tooling         | Cursor (AI-assisted dev)                     |
 
 ---
 
-## 🏗️ SaaS Architecture Overview
+## 🏗️ Architecture Overview
 
 ```
 Customer (Web / Mobile)
         ↓
-Tenant-Scoped Frontend
+Next.js Frontend (Vercel)
         ↓
-FastAPI Backend
+Next.js API Routes
         ↓
-Tenant Resolver Middleware
-        ↓
-Business Logic & Services
-        ↓
-PostgreSQL (Shared DB, Tenant-Isolated)
+Supabase (PostgreSQL)
         ↓
 Stripe Checkout → Webhooks
         ↓
@@ -102,8 +91,8 @@ Admin Kitchen Screen
 
 ### Key Principle
 
-The **frontend is stateless UI**.
-All business logic, validation, payments, and rules live in the backend.
+**Single deployment, simple architecture.**
+All API logic lives in Next.js API routes, database is managed by Supabase.
 
 ---
 
