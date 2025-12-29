@@ -76,7 +76,6 @@ export default function AdminLogin() {
           width: 80, 
           height: 80, 
           borderRadius: 3, 
-          bgcolor: 'secondary.main',
           bgcolor: '#F4A26115',
           display: 'flex',
           alignItems: 'center',
