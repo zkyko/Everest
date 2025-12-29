@@ -13,7 +13,9 @@ export default function HomePage() {
   const [status, setStatus] = useState({
     isOpen: true,
     kitchenLoad: 'LOW',
-    estimatedTime: '12-15 min'
+    estimatedTime: '12-15 min',
+    waitTime: '12-15 min',
+    waitTimeLevel: 'LOW' as 'LOW' | 'MEDIUM' | 'HIGH'
   })
 
   useEffect(() => {
