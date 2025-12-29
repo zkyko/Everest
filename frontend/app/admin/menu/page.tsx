@@ -12,6 +12,15 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import PageInfo from '@/components/PageInfo'
 
+interface MenuItemData {
+  name: string
+  description: string
+  price: number
+  category_id: string | null
+  is_available: boolean
+  display_order: number
+}
+
 export default function AdminMenu() {
   const { addToast } = useToast()
   const [menu, setMenu] = useState<any[]>([])
@@ -202,7 +211,7 @@ export default function AdminMenu() {
           setShowAddItem(false)
           setEditingItem(null)
         }}
-        onSave={(data) => {
+        onSave={(data: MenuItemData) => {
           if (editingItem) {
             handleUpdateItem(editingItem.id, data)
           } else {
