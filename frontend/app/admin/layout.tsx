@@ -7,7 +7,7 @@ import {
   IconButton, AppBar, Toolbar, Typography, Divider
 } from '@mui/material'
 import {
-  LayoutDashboard, Package, CreditCard, Settings, Activity, X, Menu as MenuIcon, Home, LogOut
+  LayoutDashboard, Package, CreditCard, Settings, Activity, X, Menu as MenuIcon, Home, LogOut, Monitor
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const menuItems = [
     { path: '/admin', label: 'Overview', icon: LayoutDashboard },
     { path: '/admin/orders', label: 'Orders', icon: Package },
+    { path: '/admin/kitchen', label: 'Kitchen Screen', icon: Monitor },
     { path: '/admin/payments', label: 'Payments', icon: CreditCard },
     { path: '/admin/integrations', label: 'Integrations', icon: Activity },
     { path: '/admin/settings', label: 'Settings', icon: Settings },
