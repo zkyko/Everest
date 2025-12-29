@@ -168,7 +168,6 @@ export default function HomePage() {
             width: 48, 
             height: 48, 
             borderRadius: 2, 
-            bgcolor: 'secondary.main',
             bgcolor: `${statusColors.medium}15`,
             display: 'flex',
             alignItems: 'center',
