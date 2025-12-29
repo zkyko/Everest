@@ -15,9 +15,24 @@ interface OrderAlertProps {
 
 export default function OrderAlert({ open, order, onAcknowledge }: OrderAlertProps) {
   const audioContextRef = useRef<AudioContext | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   // Play triple beep alert sound
   const playAlertSound = () => {
+    // Try to play MP3 file first
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {
+        // Fallback to Web Audio API if MP3 fails
+        playWebAudioBeep()
+      })
+      return
+    }
+    
+    // Fallback to Web Audio API
+    playWebAudioBeep()
+  }
+
+  const playWebAudioBeep = () => {
     try {
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
@@ -74,26 +89,32 @@ export default function OrderAlert({ open, order, onAcknowledge }: OrderAlertPro
                     || 1
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => {}} // Prevent closing by clicking outside
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown // Prevent ESC key from closing
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          overflow: 'visible',
-          position: 'relative',
-        },
-      }}
-      BackdropProps={{
-        sx: {
-          bgcolor: 'rgba(0, 0, 0, 0.8)', // Darker backdrop
-        },
-      }}
-    >
-      {/* Pulsing border effect */}
+    <>
+      {/* Hidden audio element for sound file */}
+      <audio ref={audioRef} preload="auto">
+        <source src="/sounds/order-alert.mp3" type="audio/mpeg" />
+      </audio>
+
+      <Dialog
+        open={open}
+        onClose={() => {}} // Prevent closing by clicking outside
+        maxWidth="sm"
+        fullWidth
+        disableEscapeKeyDown // Prevent ESC key from closing
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: 'visible',
+            position: 'relative',
+          },
+        }}
+        BackdropProps={{
+          sx: {
+            bgcolor: 'rgba(0, 0, 0, 0.8)', // Darker backdrop
+          },
+        }}
+      >
+        {/* Pulsing border effect */}
       <MotionBox
         sx={{
           position: 'absolute',
@@ -239,6 +260,7 @@ export default function OrderAlert({ open, order, onAcknowledge }: OrderAlertPro
         </Typography>
       </Box>
     </Dialog>
+    </>
   )
 }
 
