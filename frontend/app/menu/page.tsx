@@ -35,49 +35,23 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       setLoading(true)
-      const fallbackData = [
-        {
-          id: '1',
-          name: lang === 'en' ? 'Nepalese Food' : 'नेपाली खाना',
-          items: [
-            { id: '1', name: 'Chicken Chow Mein', description: '6 oz noodles, fresh vegetables, 3 oz chicken', price: 12.99, is_available: true },
-            { id: '2', name: 'Chicken Momo', description: 'Traditional Nepalese dumplings', price: 12.99, is_available: true },
-            { id: '3', name: 'Chicken Jhol Momo', description: 'Dumplings in a flavorful broth', price: 12.99, is_available: true },
-            { id: '4', name: 'Veg Momos', description: 'Steamed vegetable dumplings', price: 11.99, is_available: true },
-          ]
-        },
-        {
-          id: '2',
-          name: lang === 'en' ? 'Indian Food' : 'भारतीय खाना',
-          items: [
-            { id: '6', name: 'Chicken Curry', description: 'Authentic Nepali style chicken curry', price: 13.99, is_available: true },
-            { id: '7', name: 'Paneer Tikka Masala', description: 'Marinated paneer in spiced gravy', price: 13.00, is_available: true },
-          ]
-        },
-        {
-          id: '3',
-          name: lang === 'en' ? 'Snacks' : 'खाजा',
-          items: [
-            { id: '9', name: 'Chatpate', description: 'Spicy and sour Nepali street snack', price: 6.99, is_available: true },
-            { id: '10', name: 'Samosa', description: 'Crispy pastry with savory filling', price: 5.99, is_available: true },
-          ]
-        }
-      ]
-
-      setMenu(fallbackData)
-      setLoading(false)
-
       try {
         const response = await api.get('/menu')
-        if (response.data && response.data.categories && response.data.categories.length > 0) {
+        if (response.data && response.data.categories) {
           setMenu(response.data.categories)
+        } else {
+          setMenu([])
         }
       } catch (e) {
-        console.log('Using fallback menu data')
+        console.error('Error loading menu:', e)
+        addToast('error', 'Failed to load menu')
+        setMenu([])
+      } finally {
+        setLoading(false)
       }
     }
     fetchMenu()
-  }, [lang])
+  }, [lang, addToast])
 
   const handleItemClick = (item: any) => {
     if (!item.is_available) {

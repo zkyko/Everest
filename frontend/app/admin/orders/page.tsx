@@ -10,7 +10,6 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import OrderDetailModal from '@/components/OrderDetailModal'
 import { statusColors } from '@/lib/theme'
-import { dummyOrders } from '@/lib/dummyData'
 
 export default function AdminOrders() {
   const { addToast } = useToast()
@@ -26,8 +25,9 @@ export default function AdminOrders() {
       const response = await api.get('/admin/orders')
       setOrders(response.data || [])
     } catch (err) {
-      // Use dummy data
-      setOrders(dummyOrders)
+      console.error('Error fetching orders:', err)
+      addToast('error', 'Failed to load orders')
+      setOrders([])
     } finally {
       setLoading(false)
       setRefreshing(false)

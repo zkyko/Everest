@@ -9,7 +9,6 @@ import { Package, TrendingUp, Activity, Clock, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import { statusColors } from '@/lib/theme'
-import { getDummyMetrics } from '@/lib/dummyData'
 
 export default function AdminOverview() {
   const { addToast } = useToast()
@@ -63,8 +62,8 @@ export default function AdminOverview() {
       })
     } catch (err) {
       // Use dummy data
-      const dummyMetrics = getDummyMetrics()
-      setMetrics(dummyMetrics)
+      console.error('Error fetching metrics:', err)
+      // Keep default metrics on error
     } finally {
       setLoading(false)
       setRefreshing(false)

@@ -60,12 +60,28 @@ export default function HomePage() {
     }
   }
 
-  const popularItems = [
-    { name: "Chicken Chow Mein", description: "6 oz noodles, fresh vegetables, 3 oz chicken", price: 12.99, id: 'chow-mein' },
-    { name: "Chicken Momo", description: "Traditional Nepalese dumplings", price: 12.99, id: 'momo' },
-    { name: "Chatpate", description: "Nepali amilo piro chat pat", price: 6.99, id: 'chatpate' },
-    { name: "Chicken Curry", description: "Farm fresh chicken, authentic Nepali style", price: 13.99, id: 'curry' }
-  ]
+  const [popularItems, setPopularItems] = useState<any[]>([])
+
+  useEffect(() => {
+    const loadPopularItems = async () => {
+      try {
+        const response = await api.get('/menu')
+        if (response.data?.categories) {
+          // Get popular items from menu (first few items from categories)
+          const allItems: any[] = []
+          response.data.categories.forEach((cat: any) => {
+            if (cat.menu_items) {
+              allItems.push(...cat.menu_items.slice(0, 2))
+            }
+          })
+          setPopularItems(allItems.slice(0, 4))
+        }
+      } catch (e) {
+        console.error('Error loading popular items:', e)
+      }
+    }
+    loadPopularItems()
+  }, [])
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>

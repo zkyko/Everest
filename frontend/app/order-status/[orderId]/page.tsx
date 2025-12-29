@@ -24,23 +24,6 @@ import { useToast } from '@/components/Toast'
 import BottomNav from '@/components/BottomNav'
 import { statusColors } from '@/lib/theme'
 
-// Dummy order progression - simulates order moving through stages
-const simulateOrderProgression = (orderId: string, startTime: Date) => {
-  const now = Date.now()
-  const elapsed = now - startTime.getTime()
-  const elapsedMinutes = elapsed / 60000
-
-  // Progress through stages based on time elapsed
-  if (elapsedMinutes < 2) {
-    return 'NEW'
-  } else if (elapsedMinutes < 8) {
-    return 'PREP'
-  } else if (elapsedMinutes < 15) {
-    return 'READY'
-  } else {
-    return 'COMPLETED'
-  }
-}
 
 export default function OrderStatusPage() {
   const params = useParams()
@@ -69,34 +52,10 @@ export default function OrderStatusPage() {
         const response = await api.get(`/orders/${orderId}`)
         setOrder(response.data)
       } catch (error) {
-        // Use dummy data with progression
-        const status = simulateOrderProgression(orderId, orderStartTime)
-        const dummyOrder = {
-          id: orderId,
-          status,
-          customer_name: 'John Doe',
-          customer_email: 'john@example.com',
-          total_amount: 32.50,
-          items: [
-            {
-              id: '1',
-              name: 'Chicken Chow Mein',
-              quantity: 1,
-              price: 12.99,
-              modifiers: { spice_level: 'Hot', extras: ['Extra Rice'] }
-            },
-            {
-              id: '2',
-              name: 'Chicken Momo',
-              quantity: 1,
-              price: 12.99,
-              modifiers: { spice_level: 'Medium', extras: [] }
-            }
-          ],
-          created_at: orderStartTime.toISOString(),
-          payment_status: 'paid'
-        }
-        setOrder(dummyOrder)
+        console.error('Error fetching order:', error)
+        addToast('error', 'Order not found')
+        // Redirect to home after showing error
+        setTimeout(() => router.push('/home'), 2000)
       } finally {
         setLoading(false)
       }
@@ -104,11 +63,11 @@ export default function OrderStatusPage() {
 
     if (orderId) {
       fetchOrder()
-      // Update every 3 seconds to show progression
+      // Update every 3 seconds to check for status changes
       const interval = setInterval(fetchOrder, 3000)
       return () => clearInterval(interval)
     }
-  }, [orderId, orderStartTime])
+  }, [orderId, addToast, router])
 
   const getStatusSteps = () => {
     const statuses = ['NEW', 'PREP', 'READY', 'COMPLETED']
