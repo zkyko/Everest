@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box, Container, Typography, Card, CardContent, Chip, IconButton,
   CircularProgress, Button, Select, MenuItem, FormControl, InputLabel
@@ -9,6 +9,7 @@ import { Package, Clock, CheckCircle2, RefreshCw, ChevronRight } from 'lucide-re
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import OrderDetailModal from '@/components/OrderDetailModal'
+import OrderAlert from '@/components/OrderAlert'
 import { statusColors } from '@/lib/theme'
 
 export default function AdminOrders() {
@@ -19,11 +20,25 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [alertOrder, setAlertOrder] = useState<any>(null)
+  const acknowledgedOrders = useRef<Set<string>>(new Set())
 
   const fetchData = async () => {
     try {
       const response = await api.get('/admin/orders')
-      setOrders(response.data || [])
+      const fetchedOrders = response.data || []
+      setOrders(fetchedOrders)
+      
+      // Check for new unacknowledged orders
+      const newOrders = fetchedOrders.filter((o: any) => 
+        o.status === 'NEW' && 
+        !acknowledgedOrders.current.has(o.id)
+      )
+      
+      // Show alert for first unacknowledged order
+      if (newOrders.length > 0 && !alertOrder) {
+        setAlertOrder(newOrders[0])
+      }
     } catch (err) {
       console.error('Error fetching orders:', err)
       addToast('error', 'Failed to load orders')
@@ -53,6 +68,14 @@ export default function AdminOrders() {
       fetchData()
     } catch (error: any) {
       addToast('error', error.response?.data?.detail || 'Failed to update status')
+    }
+  }
+
+  const handleAcknowledgeAlert = () => {
+    if (alertOrder) {
+      acknowledgedOrders.current.add(alertOrder.id)
+      setAlertOrder(null)
+      addToast('success', 'Order acknowledged')
     }
   }
 
@@ -89,6 +112,13 @@ export default function AdminOrders() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      {/* Order Alert Modal */}
+      <OrderAlert 
+        open={!!alertOrder} 
+        order={alertOrder} 
+        onAcknowledge={handleAcknowledgeAlert}
+      />
+
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
         <Box>
           <Typography variant="h1" sx={{ mb: 1 }}>Orders</Typography>

@@ -9,15 +9,18 @@ import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import KitchenOrderCard from '@/components/KitchenOrderCard'
+import OrderAlert from '@/components/OrderAlert'
 
 export default function KitchenScreen() {
   const router = useRouter()
   const { addToast } = useToast()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [alertOrder, setAlertOrder] = useState<any>(null)
   const previousOrderCount = useRef(0)
   const audioRef = useRef<HTMLAudioElement>(null)
   const completedOrdersRef = useRef<Set<string>>(new Set())
+  const acknowledgedOrders = useRef<Set<string>>(new Set())
 
   // Function to play notification sound
   const playNotificationSound = useCallback(() => {
@@ -67,21 +70,24 @@ export default function KitchenScreen() {
       
       setOrders(activeOrders)
       
-      // Play sound if new orders detected
-      const newOrderCount = activeOrders.filter((o: any) => o.status === 'NEW').length
-      const prevNewCount = previousOrderCount.current
+      // Check for new unacknowledged orders
+      const newOrders = activeOrders.filter((o: any) => 
+        o.status === 'NEW' && 
+        !acknowledgedOrders.current.has(o.id)
+      )
       
-      if (newOrderCount > prevNewCount && prevNewCount > 0) {
-        playNotificationSound()
+      // Show alert for first unacknowledged order
+      if (newOrders.length > 0 && !alertOrder) {
+        setAlertOrder(newOrders[0])
       }
       
-      previousOrderCount.current = newOrderCount
+      previousOrderCount.current = activeOrders.filter((o: any) => o.status === 'NEW').length
     } catch (err) {
       console.error('Error fetching orders:', err)
     } finally {
       setLoading(false)
     }
-  }, [playNotificationSound])
+  }, [playNotificationSound, alertOrder])
 
   useEffect(() => {
     fetchData()
@@ -126,6 +132,14 @@ export default function KitchenScreen() {
     router.push('/admin/orders')
   }
 
+  const handleAcknowledgeAlert = () => {
+    if (alertOrder) {
+      acknowledgedOrders.current.add(alertOrder.id)
+      setAlertOrder(null)
+      addToast('success', 'Order acknowledged')
+    }
+  }
+
   if (loading && orders.length === 0) {
     return (
       <Box sx={{ 
@@ -147,6 +161,13 @@ export default function KitchenScreen() {
       p: { xs: 2, sm: 3, md: 4 },
       position: 'relative'
     }}>
+      {/* Order Alert Modal */}
+      <OrderAlert 
+        open={!!alertOrder} 
+        order={alertOrder} 
+        onAcknowledge={handleAcknowledgeAlert}
+      />
+
       {/* Audio element for notifications */}
       <audio ref={audioRef} preload="auto">
         <source src="/sounds/new-order.mp3" type="audio/mpeg" />
