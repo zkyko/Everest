@@ -15,13 +15,18 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-// Safety check - log if keys are missing (will show in Vercel logs)
+// 🔍 DETAILED DEBUG LOGGING (will show in Vercel Function logs)
+console.log('🔧 SUPABASE ADMIN CLIENT INIT:', {
+  'URL exists': !!supabaseUrl,
+  'URL value': supabaseUrl || 'UNDEFINED',
+  'SERVICE_ROLE_KEY exists': !!supabaseServiceRoleKey,
+  'SERVICE_ROLE_KEY prefix': supabaseServiceRoleKey ? supabaseServiceRoleKey.substring(0, 20) + '...' : 'UNDEFINED',
+  'All env vars': Object.keys(process.env).filter(k => k.includes('SUPABASE')),
+})
+
+// Safety check - log if keys are missing
 if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error('❌ MISSING ADMIN SUPABASE KEYS:', {
-    url: !!supabaseUrl,
-    serviceRoleKey: !!supabaseServiceRoleKey,
-    serviceRoleKeyPrefix: supabaseServiceRoleKey?.substring(0, 10) + '...'
-  })
+  console.error('❌ MISSING ADMIN SUPABASE KEYS - CLIENT WILL FAIL!')
 }
 
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {

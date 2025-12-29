@@ -18,9 +18,15 @@ export async function GET() {
       .in('status', ['NEW', 'ACCEPTED'])
     
     if (ordersError) {
-      console.error('Error fetching active orders:', ordersError)
+      console.error('❌ METRICS ERROR - Error fetching active orders:', ordersError)
+      console.error('🔍 Error details:', {
+        message: ordersError.message,
+        hint: ordersError.hint,
+        code: ordersError.code,
+        details: ordersError.details
+      })
       return NextResponse.json(
-        { error: 'Failed to fetch metrics' },
+        { error: 'Failed to fetch metrics', details: ordersError.message },
         { status: 500 }
       )
     }
