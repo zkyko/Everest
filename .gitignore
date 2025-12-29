@@ -48,3 +48,9 @@ coverage/
 *.tsbuildinfo
 .cache/
 
+# Environment variable documentation files (may contain secrets)
+VERCEL_ENV_*.md
+VERCEL_ENV_*.txt
+env-for-vercel.txt
+HOW_TO_ADD_TO_VERCEL.md
+
