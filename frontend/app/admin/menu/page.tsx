@@ -387,9 +387,11 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
                 fullWidth
                 label="Price *"
                 type="number"
-                step="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                inputProps={{
+                  step: "0.01"
+                }}
                 InputProps={{
                   startAdornment: <DollarSign size={18} style={{ marginRight: 8, opacity: 0.5 }} />
                 }}
