@@ -5,6 +5,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
+  // Must match the Stripe SDK's supported apiVersion union type for this package version
+  apiVersion: '2023-10-16',
 })
 

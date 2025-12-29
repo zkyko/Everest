@@ -35,6 +35,15 @@ interface ModifierOption {
   price_modifier: number
 }
 
+interface ModifierGroupLike {
+  id: string
+  name: string
+  is_required: boolean
+  min_selections?: number
+  max_selections?: number
+  options: ModifierOption[]
+}
+
 interface MenuItemModalProps {
   open: boolean
   item: any
@@ -78,7 +87,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     },
   ]
 
-  const modifierGroups = item.modifier_groups || defaultModifiers
+  const modifierGroups: ModifierGroupLike[] = item.modifier_groups || defaultModifiers
 
   const handleModifierChange = (groupId: string, optionId: string, isMultiple: boolean) => {
     setSelectedModifiers((prev) => {
@@ -99,9 +108,9 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
   const calculateTotal = () => {
     let total = parseFloat(item.price || 0) * quantity
     Object.values(selectedModifiers).forEach((optionIds) => {
-      modifierGroups.forEach((group) => {
+      modifierGroups.forEach((group: ModifierGroupLike) => {
         optionIds.forEach((optionId) => {
-          const option = group.options.find((opt) => opt.id === optionId)
+          const option = group.options.find((opt: ModifierOption) => opt.id === optionId)
           if (option) {
             total += parseFloat(String(option.price_modifier || 0)) * quantity
           }
@@ -124,9 +133,9 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     setSelectedModifiers({})
   }
 
-  const canAddToCart = modifierGroups.every(
-    (group) => !group.is_required || (selectedModifiers[group.id] && selectedModifiers[group.id].length > 0)
-  )
+  const canAddToCart = modifierGroups.every((group: ModifierGroupLike) => (
+    !group.is_required || (selectedModifiers[group.id] && selectedModifiers[group.id].length > 0)
+  ))
 
   return (
     <Dialog
@@ -163,19 +172,19 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
 
         {/* Modifier Groups */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {modifierGroups.map((group) => (
+          {modifierGroups.map((group: ModifierGroupLike) => (
             <FormControl key={group.id} required={group.is_required}>
               <FormLabel sx={{ mb: 1, fontWeight: 600 }}>
                 {group.name}
                 {group.is_required && <Chip label="Required" size="small" sx={{ ml: 1, height: 20 }} />}
               </FormLabel>
-              {group.max_selections === 1 ? (
+              {(group.max_selections ?? 1) === 1 ? (
                 // Single selection (Radio)
                 <RadioGroup
                   value={selectedModifiers[group.id]?.[0] || ''}
                   onChange={(e) => handleModifierChange(group.id, e.target.value, false)}
                 >
-                  {group.options.map((option) => (
+                  {group.options.map((option: ModifierOption) => (
                     <FormControlLabel
                       key={option.id}
                       value={option.id}
@@ -196,7 +205,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
               ) : (
                 // Multiple selection (Checkboxes)
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {group.options.map((option) => {
+                  {group.options.map((option: ModifierOption) => {
                     const isSelected = selectedModifiers[group.id]?.includes(option.id) || false
                     return (
                       <Box

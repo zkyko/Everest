@@ -103,7 +103,6 @@ export default function BottomNav() {
                     transform: 'translateX(-50%)',
                     width: '80%',
                     height: '100%',
-                    bgcolor: 'secondary.main',
                     bgcolor: 'rgba(244, 162, 97, 0.15)',
                     borderRadius: 3,
                     zIndex: 0,
