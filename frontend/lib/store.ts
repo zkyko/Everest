@@ -8,6 +8,8 @@ interface CartItem {
   price: number
   is_available?: boolean
   cartId?: number
+  modifiers?: Record<string, string[]>
+  originalPrice?: number
 }
 
 interface CartStore {
