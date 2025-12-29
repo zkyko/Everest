@@ -46,7 +46,7 @@ export default function OrderStatusPage() {
   const params = useParams()
   const router = useRouter()
   const { addToast } = useToast()
-  const orderId = params.orderId as string
+  const orderId = (params?.orderId as string) || ''
   const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [orderStartTime] = useState(() => {
@@ -63,6 +63,7 @@ export default function OrderStatusPage() {
   })
 
   useEffect(() => {
+    if (!orderId) return
     const fetchOrder = async () => {
       try {
         const response = await api.get(`/orders/${orderId}`)
