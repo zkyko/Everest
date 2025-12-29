@@ -13,7 +13,7 @@ This backend is seeded with a single tenant (Everest Food Truck) for demo purpos
 ### Prerequisites
 
 - Python 3.11+
-- PostgreSQL 14+
+- Database: PostgreSQL 14+ (local) or Supabase (recommended for Vercel)
 - Stripe account (for payments)
 
 ### Installation
@@ -33,6 +33,17 @@ cp .env.example .env
 3. Update `.env` with your database and Stripe credentials.
 
 ### Database Setup
+
+#### Option 1: Supabase (Recommended for Vercel)
+
+1. Create a Supabase project at https://supabase.com
+2. Get your connection string from **Settings → Database**
+3. Convert to asyncpg format: `postgresql+asyncpg://postgres:password@db.xxxxx.supabase.co:5432/postgres`
+4. Update `DATABASE_URL` in `.env` with your Supabase connection string
+
+See `SUPABASE_SETUP.md` for detailed instructions.
+
+#### Option 2: Local PostgreSQL
 
 1. Create a PostgreSQL database:
 
@@ -79,6 +90,8 @@ See `.env.example` for all required environment variables.
 
 Key variables:
 - `DATABASE_URL`: PostgreSQL connection string (use `postgresql+asyncpg://`)
+  - For Supabase: `postgresql+asyncpg://postgres:password@db.xxxxx.supabase.co:5432/postgres`
+  - For local: `postgresql+asyncpg://user:password@localhost:5432/dbname`
 - `SECRET_KEY`: JWT secret key (generate a secure random string)
 - `STRIPE_SECRET_KEY`: Stripe secret key
 - `STRIPE_PUBLISHABLE_KEY`: Stripe publishable key

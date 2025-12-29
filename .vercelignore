@@ -1,0 +1,43 @@
+# Backend files (not needed for frontend deployment)
+backend/
+*.py
+requirements.txt
+alembic.ini
+alembic/
+
+# Documentation files
+*.md
+!frontend/README.md
+
+# Git files
+.git/
+.gitignore
+
+# Environment files (Vercel handles these)
+.env
+.env.local
+.env.*.local
+
+# Old Vite files (if not being used)
+frontend/src/
+frontend/vite.config.js
+frontend/index.html
+
+# Node modules (will be installed by Vercel)
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+

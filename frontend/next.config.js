@@ -1,17 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export', // Enable static export for GitHub Pages
+  // Vercel handles SSR/ISR automatically - no need for static export
   images: {
-    unoptimized: true, // Required for static export
-    domains: [],
+    unoptimized: false, // Vercel optimizes images automatically
+    remotePatterns: [],
   },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
-  },
-  // Only use basePath for GitHub Pages, not for Docker deployment
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.GITHUB_PAGES ? '/Everest' : ''),
-  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.GITHUB_PAGES ? '/Everest' : ''),
+  // Only use basePath for GitHub Pages (when GITHUB_PAGES env var is set)
+  basePath: process.env.GITHUB_PAGES ? '/Everest' : '',
+  assetPrefix: process.env.GITHUB_PAGES ? '/Everest' : '',
 }
 
 module.exports = nextConfig

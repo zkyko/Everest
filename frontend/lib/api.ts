@@ -1,7 +1,6 @@
 import axios from 'axios'
 
-// Use relative URL for Docker deployment (nginx will proxy to backend)
-// Falls back to localhost for local development
+// Use environment variable for API URL, falls back to localhost for local development
 const getApiBaseURL = () => {
   if (typeof window !== 'undefined') {
     // In browser: use environment variable or relative path
