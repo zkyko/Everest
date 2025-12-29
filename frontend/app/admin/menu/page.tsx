@@ -31,7 +31,8 @@ export default function AdminMenu() {
   const fetchMenu = useCallback(async () => {
     try {
       const response = await api.get('/admin/menu')
-      setMenu(response.data.categories || [])
+      console.log('📋 Menu data received:', response.data)
+      setMenu(response.data || [])
     } catch (error) {
       console.error('Failed to fetch menu:', error)
       addToast('error', 'Failed to load menu')
@@ -94,15 +95,17 @@ export default function AdminMenu() {
 
   const handleToggleAvailability = async (item: any) => {
     try {
-      if (item.is_available) {
-        await api.post(`/admin/menu/menu-item/${item.id}/soldout`)
-      } else {
-        await api.post(`/admin/menu/menu-item/${item.id}/available`)
-      }
-      addToast('success', `Item marked as ${item.is_available ? 'unavailable' : 'available'}`)
+      console.log('🔄 Toggling availability for item:', item.id, 'Current status:', item.is_available)
+      
+      // Use the correct API endpoint with query params
+      const action = item.is_available ? 'soldout' : 'available'
+      await api.post(`/admin/menu?id=${item.id}&action=${action}`)
+      
+      addToast('success', item.is_available ? '🚫 Marked as sold out' : '✅ Marked as available')
       fetchMenu()
-    } catch (error) {
-      addToast('error', 'Failed to update availability')
+    } catch (error: any) {
+      console.error('Failed to toggle availability:', error)
+      addToast('error', error.response?.data?.error || 'Failed to update availability')
     }
   }
 
@@ -157,12 +160,12 @@ export default function AdminMenu() {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Typography variant="h2">{category.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {category.items?.length || 0} items
+                    {(category.menu_items || category.items)?.length || 0} items
                   </Typography>
                 </Box>
-                {category.items && category.items.length > 0 ? (
+                {(category.menu_items || category.items) && (category.menu_items || category.items).length > 0 ? (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {category.items.map((item: any) => (
+                    {(category.menu_items || category.items).map((item: any) => (
                       <MenuItemRow
                         key={item.id}
                         item={item}
