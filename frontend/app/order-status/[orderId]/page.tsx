@@ -23,7 +23,6 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import BottomNav from '@/components/BottomNav'
 import { statusColors } from '@/lib/theme'
-import PageInfo from '@/components/PageInfo'
 
 // Dummy order progression - simulates order moving through stages
 const simulateOrderProgression = (orderId: string, startTime: Date) => {
@@ -163,25 +162,14 @@ export default function OrderStatusPage() {
 
   if (loading) {
     return (
-      <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageInfo
-        title="Order Tracking"
-        description="Customers can track their order in real-time as it moves through the kitchen. The status automatically updates: Order Received → In Preparation → Ready for Pickup → Completed. This page auto-refreshes every 3 seconds to show the latest status."
-        endpoints={['GET /orders/{id}']}
-        connections={[
-          'Checkout: After payment, customers are redirected here',
-          'Admin Orders: Kitchen staff update status, which reflects here',
-          'Home: Customers can return to browse menu while waiting'
-        ]}
-        pageType="customer"
-      />
+    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
       
       {/* Header */}
       <Box sx={{ 

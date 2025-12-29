@@ -10,7 +10,6 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import { statusColors } from '@/lib/theme'
 import { getDummyMetrics } from '@/lib/dummyData'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminOverview() {
   const { addToast } = useToast()
@@ -112,18 +111,6 @@ export default function AdminOverview() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
-      <PageInfo
-        title="Admin Overview Dashboard"
-        description="This is the main control center for the food truck owner. It shows real-time metrics like today's orders, active orders in the kitchen, revenue, and estimated wait times. The wait time automatically adjusts based on how many orders are currently being prepared."
-        endpoints={['GET /admin/orders', 'GET /metrics/volume']}
-        connections={[
-          'Orders page: Click to see detailed order list and manage order statuses',
-          'Menu page: Manage menu items, prices, and availability',
-          'Payments page: View payment transactions and Stripe integration status',
-          'Settings page: Configure wait times, hours, and business info'
-        ]}
-        pageType="admin"
-      />
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box>
           <Typography variant="h1" sx={{ mb: 1 }}>Overview</Typography>

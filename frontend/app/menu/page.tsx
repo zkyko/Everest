@@ -13,7 +13,6 @@ import { useToast } from '@/components/Toast'
 import BottomNav from '@/components/BottomNav'
 import MenuItemModal from '@/components/MenuItemModal'
 import DarkModeToggle from '@/components/DarkModeToggle'
-import PageInfo from '@/components/PageInfo'
 import { statusColors } from '@/lib/theme'
 
 export default function MenuPage() {
@@ -153,25 +152,14 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography color="text.secondary">Loading menu...</Typography>
       </Box>
     )
   }
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageInfo
-        title="Menu Browsing"
-        description="Customers browse the full menu organized by categories (Nepalese Food, Indian Food, etc.). Click any item to customize it - select spice level (Mild to Extra Hot) and add extras like extra rice, meat, or sauce. All customizations are saved with the item when added to cart."
-        endpoints={['GET /api/menu']}
-        connections={[
-          'Cart: Customized items are added with all modifications',
-          'Home: Popular items link back to full menu',
-          'Admin Menu: Owners can edit items, prices, and availability here'
-        ]}
-        pageType="customer"
-      />
+    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Header */}
       <Box sx={{ 
         position: 'sticky', 

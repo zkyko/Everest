@@ -17,7 +17,6 @@ import { ShoppingBag, Trash2, ArrowLeft, Plus, Minus, Clock, ChevronRight } from
 import { useCartStore } from '@/lib/store'
 import { useToast } from '@/components/Toast'
 import BottomNav from '@/components/BottomNav'
-import PageInfo from '@/components/PageInfo'
 import { statusColors } from '@/lib/theme'
 
 export default function CartPage() {
@@ -98,18 +97,7 @@ export default function CartPage() {
   const total = subtotal + tax
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageInfo
-        title="Shopping Cart"
-        description="This is where customers review their order before checkout. Each item shows its customizations (spice level, extras) clearly. Customers can adjust quantities or remove items. The total includes tax calculation. When ready, they proceed to checkout to enter payment and delivery info."
-        endpoints={[]}
-        connections={[
-          'Menu: Items are added here with all customizations',
-          'Checkout: Proceed to payment and order submission',
-          'Order Status: After checkout, customers can track their order'
-        ]}
-        pageType="customer"
-      />
+    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Header */}
       <Box sx={{ 
         position: 'sticky', 
@@ -339,7 +327,7 @@ export default function CartPage() {
           left: '50%', 
           transform: 'translateX(-50%)',
           width: '100%',
-          maxWidth: 500,
+          maxWidth: { xs: '100%', sm: 500 },
           bgcolor: 'background.paper',
           borderTop: '1px solid',
           borderColor: 'divider',

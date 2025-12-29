@@ -20,7 +20,6 @@ import { Lock, Mail, Shield, ChevronLeft, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { useToast } from '@/components/Toast'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -63,19 +62,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default', px: 3, py: 6 }}>
-      <PageInfo
-        title="Admin Login"
-        description="This is the secure entry point to the admin dashboard. Owners and staff use this to access the full management system. The credentials are pre-filled for demo purposes - just click 'Quick Login' to access the admin panel."
-        endpoints={['POST /admin/auth/login']}
-        connections={[
-          'Overview: Main dashboard showing orders, revenue, and wait times',
-          'Orders: Kitchen view to manage incoming orders',
-          'Menu: Edit menu items, prices, and availability',
-          'Settings: Configure business hours and wait times'
-        ]}
-        pageType="admin"
-      />
+    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default', px: 3, py: 6 }}>
       <Button
         startIcon={<ChevronLeft size={20} />}
         onClick={() => router.push('/home')}

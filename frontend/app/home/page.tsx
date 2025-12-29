@@ -7,7 +7,6 @@ import Link from 'next/link'
 import api from '@/lib/api'
 import BottomNav from '@/components/BottomNav'
 import DarkModeToggle from '@/components/DarkModeToggle'
-import PageInfo from '@/components/PageInfo'
 import { statusColors } from '@/lib/theme'
 
 export default function HomePage() {
@@ -59,18 +58,7 @@ export default function HomePage() {
   ]
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageInfo
-        title="Customer Home Page"
-        description="This is the main landing page for customers. It shows the restaurant status (open/closed), current wait time, location info, and popular menu items. Customers can browse the menu, see what's popular, and start ordering. The wait time updates automatically based on kitchen load."
-        endpoints={['GET /metrics/volume']}
-        connections={[
-          'Menu page: Browse full menu and add items to cart',
-          'Cart page: Review order before checkout',
-          'Admin login: Owners can access management dashboard'
-        ]}
-        pageType="customer"
-      />
+    <Box sx={{ maxWidth: { xs: '100%', sm: 500 }, mx: 'auto', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Status Bar - Sticky */}
       <Box sx={{ 
         position: 'sticky', 

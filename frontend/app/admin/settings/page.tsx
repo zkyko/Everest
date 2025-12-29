@@ -9,7 +9,6 @@ import {
 import { Save } from 'lucide-react'
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminSettings() {
   const { addToast } = useToast()

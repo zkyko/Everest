@@ -8,7 +8,6 @@ import {
 import { CheckCircle2, XCircle, Clock } from 'lucide-react'
 import api from '@/lib/api'
 import { statusColors } from '@/lib/theme'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminIntegrations() {
   const [integrations, setIntegrations] = useState<any[]>([])

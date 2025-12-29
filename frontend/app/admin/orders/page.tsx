@@ -11,7 +11,6 @@ import { useToast } from '@/components/Toast'
 import OrderDetailModal from '@/components/OrderDetailModal'
 import { statusColors } from '@/lib/theme'
 import { dummyOrders } from '@/lib/dummyData'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminOrders() {
   const { addToast } = useToast()
@@ -90,17 +89,6 @@ export default function AdminOrders() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
-      <PageInfo
-        title="Order Management"
-        description="This is the kitchen view where staff can see all incoming orders in real-time. Each order card shows the customer name, items ordered, total price, and current status. Click the arrow on any order to see a detailed receipt with all modifications (spice levels, extras). You can update order status as it moves through the kitchen: NEW → PREP → READY → COMPLETED."
-        endpoints={['GET /admin/orders', 'POST /admin/orders/{id}/status']}
-        connections={[
-          'Overview page: Metrics update automatically when orders change status',
-          'Order detail modal: Shows full receipt with all item modifications',
-          'Status updates: Changes are saved to backend and reflected everywhere'
-        ]}
-        pageType="admin"
-      />
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
         <Box>
           <Typography variant="h1" sx={{ mb: 1 }}>Orders</Typography>
@@ -161,7 +149,6 @@ export default function AdminOrders() {
                         width: 48, 
                         height: 48, 
                         borderRadius: 2, 
-                        bgcolor: `${getStatusColor(order.status)}.main`,
                         bgcolor: `${getStatusColor(order.status)}.main15`,
                         display: 'flex',
                         alignItems: 'center',

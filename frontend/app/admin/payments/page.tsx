@@ -8,7 +8,6 @@ import {
 import { CheckCircle2, ExternalLink, AlertCircle } from 'lucide-react'
 import api from '@/lib/api'
 import { statusColors } from '@/lib/theme'
-import PageInfo from '@/components/PageInfo'
 
 export default function AdminPayments() {
   const [status, setStatus] = useState({

@@ -10,7 +10,6 @@ import {
 import { Plus, Edit2, Trash2, Tag, CheckCircle2, X, DollarSign, Package } from 'lucide-react'
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
-import PageInfo from '@/components/PageInfo'
 
 interface MenuItemData {
   name: string
@@ -117,17 +116,6 @@ export default function AdminMenu() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
-      <PageInfo
-        title="Menu Management"
-        description="This is where owners can manage their entire menu. Add new items, edit prices, update descriptions, mark items as sold out, and organize items into categories. Changes here instantly appear on the customer-facing menu page. This is the core content management system for the restaurant."
-        endpoints={['GET /admin/menu', 'POST /admin/menu/items', 'PUT /admin/menu/items/{id}', 'DELETE /admin/menu/items/{id}']}
-        connections={[
-          'Customer Menu: All changes instantly reflect on the public menu',
-          'Orders: When customers order, they see the exact item name and price from when they ordered',
-          'Overview: Menu changes affect revenue calculations and popular items'
-        ]}
-        pageType="admin"
-      />
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box>
           <Typography variant="h1" sx={{ mb: 1 }}>Menu Management</Typography>
