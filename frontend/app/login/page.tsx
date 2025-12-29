@@ -25,7 +25,7 @@ export default function AdminLogin() {
   const router = useRouter()
   const { setAdmin } = useAuthStore()
   const { addToast } = useToast()
-  const [email, setEmail] = useState('admin@everest.com')
+  const [email, setEmail] = useState('admin@everesthoward.com')
   const [password, setPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
 
@@ -34,28 +34,19 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const response = await api.post('/admin/auth/login', { email, password })
-      if (response.data.access_token) {
+      const response = await api.post('/admin/auth', { email, password })
+      if (response.data.token) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('adminToken', response.data.access_token)
+          localStorage.setItem('adminToken', response.data.token)
         }
         setAdmin(true)
         addToast('success', 'Login successful!')
         router.push('/admin')
       }
     } catch (err: any) {
-      // Fallback for demo
-      if (email === 'admin@everest.com' && password === 'admin123') {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('adminToken', 'mock-token')
-        }
-        setAdmin(true)
-        addToast('success', 'Login successful!')
-        router.push('/admin')
-      } else {
-        const errorMsg = err.response?.data?.detail || 'Authentication failed. Please check your credentials.'
-        addToast('error', errorMsg)
-      }
+      console.error('Login error:', err)
+      const errorMsg = err.response?.data?.error || 'Authentication failed. Please check your credentials.'
+      addToast('error', errorMsg)
     } finally {
       setLoading(false)
     }
@@ -101,7 +92,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@everest.com"
+                placeholder="admin@everesthoward.com"
                 required
                 fullWidth
                 InputProps={{
@@ -165,7 +156,7 @@ export default function AdminLogin() {
           Secure Terminal • V1.0.0
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-          Demo: admin@everest.com / admin123
+          Demo: admin@everesthoward.com / admin123
         </Typography>
       </Box>
     </Box>
