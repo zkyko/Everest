@@ -10,6 +10,7 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import KitchenOrderCard from '@/components/KitchenOrderCard'
 import OrderAlert from '@/components/OrderAlert'
+import { supabasePublic } from '@/lib/supabase-public'
 
 export default function KitchenScreen() {
   const router = useRouter()
@@ -91,9 +92,32 @@ export default function KitchenScreen() {
 
   useEffect(() => {
     fetchData()
-    // Faster polling for kitchen screen (5 seconds)
-    const interval = setInterval(fetchData, 5000)
-    return () => clearInterval(interval)
+    
+    // Set up Supabase Realtime subscription for instant updates
+    const channel = supabasePublic
+      .channel('kitchen-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          console.log('🔥 Realtime order update:', payload)
+          // Refresh data when any order changes
+          fetchData()
+        }
+      )
+      .subscribe()
+
+    // Keep polling as fallback (every 30 seconds instead of 5)
+    const interval = setInterval(fetchData, 30000)
+    
+    return () => {
+      channel.unsubscribe()
+      clearInterval(interval)
+    }
   }, [fetchData])
 
   const handleStatusUpdate = async (orderId: string, currentStatus: string) => {

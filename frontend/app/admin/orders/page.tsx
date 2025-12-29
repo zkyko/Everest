@@ -11,6 +11,7 @@ import { useToast } from '@/components/Toast'
 import OrderDetailModal from '@/components/OrderDetailModal'
 import OrderAlert from '@/components/OrderAlert'
 import { statusColors } from '@/lib/theme'
+import { supabasePublic } from '@/lib/supabase-public'
 
 export default function AdminOrders() {
   const { addToast } = useToast()
@@ -51,8 +52,32 @@ export default function AdminOrders() {
 
   useEffect(() => {
     fetchData()
-    const interval = setInterval(fetchData, 10000)
-    return () => clearInterval(interval)
+    
+    // Set up Supabase Realtime subscription for instant updates
+    const channel = supabasePublic
+      .channel('admin-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          console.log('🔥 Realtime order update:', payload)
+          // Refresh data when any order changes
+          fetchData()
+        }
+      )
+      .subscribe()
+
+    // Keep polling as fallback (every 30 seconds instead of 10)
+    const interval = setInterval(fetchData, 30000)
+    
+    return () => {
+      channel.unsubscribe()
+      clearInterval(interval)
+    }
   }, [fetchData])
 
   const handleRefresh = () => {

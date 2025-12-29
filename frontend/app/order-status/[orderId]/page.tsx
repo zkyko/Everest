@@ -23,6 +23,7 @@ import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 import BottomNav from '@/components/BottomNav'
 import { statusColors } from '@/lib/theme'
+import { supabasePublic } from '@/lib/supabase-public'
 
 
 export default function OrderStatusPage() {
@@ -47,6 +48,7 @@ export default function OrderStatusPage() {
 
   useEffect(() => {
     if (!orderId) return
+    
     const fetchOrder = async () => {
       try {
         const response = await api.get(`/orders/${orderId}`)
@@ -63,9 +65,36 @@ export default function OrderStatusPage() {
 
     if (orderId) {
       fetchOrder()
-      // Update every 3 seconds to check for status changes
-      const interval = setInterval(fetchOrder, 3000)
-      return () => clearInterval(interval)
+      
+      // Set up Supabase Realtime subscription for instant status updates
+      const channel = supabasePublic
+        .channel(`customer-order-${orderId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE', // Listen only to updates
+            schema: 'public',
+            table: 'orders',
+            filter: `id=eq.${orderId}` // Only listen to this specific order
+          },
+          (payload) => {
+            console.log('🔥 Realtime order status update:', payload)
+            // Update order immediately when status changes
+            setOrder((prev: any) => ({
+              ...prev,
+              ...payload.new
+            }))
+          }
+        )
+        .subscribe()
+      
+      // Keep polling as fallback (every 30 seconds instead of 3)
+      const interval = setInterval(fetchOrder, 30000)
+      
+      return () => {
+        channel.unsubscribe()
+        clearInterval(interval)
+      }
     }
   }, [orderId, addToast, router])
 
