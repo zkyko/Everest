@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Box, Container, Typography, Card, CardContent, Chip, IconButton,
   CircularProgress, Button, Select, MenuItem, FormControl, InputLabel
@@ -23,7 +23,7 @@ export default function AdminOrders() {
   const [alertOrder, setAlertOrder] = useState<any>(null)
   const acknowledgedOrders = useRef<Set<string>>(new Set())
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const response = await api.get('/admin/orders')
       const fetchedOrders = response.data || []
@@ -47,13 +47,13 @@ export default function AdminOrders() {
       setLoading(false)
       setRefreshing(false)
     }
-  }
+  }, [alertOrder, addToast])
 
   useEffect(() => {
     fetchData()
     const interval = setInterval(fetchData, 10000)
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchData])
 
   const handleRefresh = () => {
     setRefreshing(true)

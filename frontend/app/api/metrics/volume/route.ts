@@ -4,6 +4,10 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
+  // 🔍 DEBUG: Verify env var is present (check Vercel Function logs)
+  console.log('🔑 SERVICE ROLE KEY PRESENT:', Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY))
+  console.log('🔑 SUPABASE URL PRESENT:', Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL))
+  
   try {
     const supabase = supabaseAdmin
     

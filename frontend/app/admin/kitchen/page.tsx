@@ -87,7 +87,7 @@ export default function KitchenScreen() {
     } finally {
       setLoading(false)
     }
-  }, [playNotificationSound, alertOrder])
+  }, [alertOrder])
 
   useEffect(() => {
     fetchData()

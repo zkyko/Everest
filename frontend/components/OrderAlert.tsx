@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { Dialog, Box, Typography, Button } from '@mui/material'
 import { Bell, User, ShoppingBag, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -17,22 +17,7 @@ export default function OrderAlert({ open, order, onAcknowledge }: OrderAlertPro
   const audioContextRef = useRef<AudioContext | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
-  // Play triple beep alert sound
-  const playAlertSound = () => {
-    // Try to play MP3 file first
-    if (audioRef.current) {
-      audioRef.current.play().catch(() => {
-        // Fallback to Web Audio API if MP3 fails
-        playWebAudioBeep()
-      })
-      return
-    }
-    
-    // Fallback to Web Audio API
-    playWebAudioBeep()
-  }
-
-  const playWebAudioBeep = () => {
+  const playWebAudioBeep = useCallback(() => {
     try {
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
@@ -64,14 +49,29 @@ export default function OrderAlert({ open, order, onAcknowledge }: OrderAlertPro
     } catch (error) {
       console.error('Failed to play alert sound:', error)
     }
-  }
+  }, [])
+
+  // Play triple beep alert sound
+  const playAlertSound = useCallback(() => {
+    // Try to play MP3 file first
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {
+        // Fallback to Web Audio API if MP3 fails
+        playWebAudioBeep()
+      })
+      return
+    }
+    
+    // Fallback to Web Audio API
+    playWebAudioBeep()
+  }, [playWebAudioBeep])
 
   // Play sound when modal opens
   useEffect(() => {
     if (open && order) {
       playAlertSound()
     }
-  }, [open, order])
+  }, [open, order, playAlertSound])
 
   if (!order) return null
 
