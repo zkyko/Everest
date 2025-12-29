@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Box, Typography, CircularProgress, IconButton, Fade
@@ -20,7 +20,7 @@ export default function KitchenScreen() {
   const completedOrdersRef = useRef<Set<string>>(new Set())
 
   // Function to play notification sound
-  const playNotificationSound = () => {
+  const playNotificationSound = useCallback(() => {
     // Try to play audio element first
     if (audioRef.current) {
       audioRef.current.play().catch(() => {
@@ -46,9 +46,9 @@ export default function KitchenScreen() {
         }
       })
     }
-  }
+  }, [])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const response = await api.get('/admin/orders')
       const allOrders = response.data || []
@@ -81,14 +81,14 @@ export default function KitchenScreen() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [playNotificationSound])
 
   useEffect(() => {
     fetchData()
     // Faster polling for kitchen screen (5 seconds)
     const interval = setInterval(fetchData, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchData])
 
   const handleStatusUpdate = async (orderId: string, currentStatus: string) => {
     const statusFlow: { [key: string]: string } = {

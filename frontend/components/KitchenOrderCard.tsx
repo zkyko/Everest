@@ -273,7 +273,7 @@ export default function KitchenOrderCard({ order, onStatusUpdate }: KitchenOrder
             }}>
               <MessageSquare size={16} style={{ marginTop: 2, flexShrink: 0 }} />
               <Typography variant="body2" sx={{ fontStyle: 'italic', fontWeight: 500 }}>
-                "{specialInstructions}"
+                &quot;{specialInstructions}&quot;
               </Typography>
             </Box>
           </>
