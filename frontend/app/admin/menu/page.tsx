@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Box, Container, Typography, Card, CardContent, Button, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
@@ -20,11 +20,7 @@ export default function AdminMenu() {
   const [showAddItem, setShowAddItem] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
 
-  useEffect(() => {
-    fetchMenu()
-  }, [])
-
-  const fetchMenu = async () => {
+  const fetchMenu = useCallback(async () => {
     try {
       const response = await api.get('/admin/menu')
       setMenu(response.data.categories || [])
@@ -34,7 +30,11 @@ export default function AdminMenu() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [addToast])
+
+  useEffect(() => {
+    fetchMenu()
+  }, [fetchMenu])
 
   const handleAddCategory = async (name: string) => {
     try {

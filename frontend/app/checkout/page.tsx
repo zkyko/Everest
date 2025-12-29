@@ -177,7 +177,7 @@ export default function CheckoutPage() {
               <span className="text-sm font-bold">Secure Payment</span>
             </div>
             <p className="text-xs text-text-muted">
-              You'll be redirected to Stripe for secure payment processing
+              You&apos;ll be redirected to Stripe for secure payment processing
             </p>
           </div>
 

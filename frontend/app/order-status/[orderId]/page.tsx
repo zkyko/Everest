@@ -380,7 +380,7 @@ export default function OrderStatusPage() {
                 }
               }}
             >
-              I've Picked Up My Order
+              I&apos;ve Picked Up My Order
             </Button>
           )}
         </Box>

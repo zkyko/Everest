@@ -27,7 +27,7 @@ export default function AdminSettings() {
     const fetchSettings = async () => {
       try {
         const response = await api.get('/admin/settings')
-        setSettings(response.data || settings)
+        setSettings(prev => response.data || prev)
       } catch (error) {
         console.log('Using default settings')
       }

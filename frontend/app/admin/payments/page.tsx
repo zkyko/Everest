@@ -23,7 +23,7 @@ export default function AdminPayments() {
     const fetchStatus = async () => {
       try {
         const response = await api.get('/admin/payments')
-        setStatus(response.data || status)
+        setStatus(prev => response.data || prev)
       } catch (error) {
         console.log('Using default status')
       } finally {
