@@ -88,8 +88,8 @@ export default function MenuPage() {
     setModalOpen(true)
   }
 
-  const handleAddToCart = (item: any, modifiers: Record<string, string[]>) => {
-    addItem({ ...item, modifiers })
+  const handleAddToCart = (detailedItem: any) => {
+    addItem(detailedItem)
     addToast('success', 'Added to cart!')
   }
 

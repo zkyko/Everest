@@ -44,8 +44,11 @@ export default function CheckoutPage() {
     try {
       const orderItems = items.map(item => ({
         menu_item_id: item.id,
-        quantity: 1,
-        modifiers: item.modifiers || {}
+        item_name: item.name,
+        item_price: item.price,
+        quantity: item.quantity,
+        item_description: item.description || '',
+        modifiers: item.selectedModifiers || []
       }))
 
       const response = await api.post('/orders', {
@@ -55,9 +58,18 @@ export default function CheckoutPage() {
         customer_phone: formData.customer_phone || null
       })
 
-      clearCart()
-      addToast('success', 'Order placed!')
-      router.push(`/order-status/${response.data.id}`)
+      // Get Stripe Checkout URL
+      const checkoutResponse = await api.post('/checkout', {
+        order_id: response.data.id,
+        success_url: `${window.location.origin}/order-status/${response.data.id}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${window.location.origin}/cart`
+      })
+
+      if (checkoutResponse.data.checkout_url) {
+        window.location.href = checkoutResponse.data.checkout_url
+      } else {
+        throw new Error('No checkout URL received')
+      }
     } catch (error) {
       const dummyId = `order_${Date.now()}`
       clearCart()
@@ -166,8 +178,11 @@ export default function CheckoutPage() {
                     <Stack spacing={2} sx={{ mb: 4 }}>
                       {items.map((item, idx) => (
                         <Stack key={idx} direction="row" justifyContent="space-between">
-                          <Typography variant="body2">{item.name}</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>${item.price.toFixed(2)}</Typography>
+                          <Box>
+                            <Typography variant="body2">{item.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">Qty: {item.quantity}</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)}</Typography>
                         </Stack>
                       ))}
                       <Divider sx={{ my: 1 }} />

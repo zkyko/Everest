@@ -51,7 +51,7 @@ interface MenuItemModalProps {
   open: boolean
   item: any
   onClose: () => void
-  onAddToCart: (item: any, modifiers: Record<string, string[]>) => void
+  onAddToCart: (item: any) => void
 }
 
 export default function MenuItemModal({ open, item, onClose, onAddToCart }: MenuItemModalProps) {
@@ -121,7 +121,31 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
   }
 
   const handleAddToCart = () => {
-    onAddToCart(item, selectedModifiers)
+    const detailedModifiers: any[] = []
+    Object.entries(selectedModifiers).forEach(([groupId, optionIds]) => {
+      const group = modifierGroups.find(g => g.id === groupId)
+      if (group) {
+        optionIds.forEach(id => {
+          const opt = group.options.find(o => o.id === id)
+          if (opt) {
+            detailedModifiers.push({
+              id: opt.id,
+              name: opt.name,
+              price: opt.price_modifier
+            })
+          }
+        })
+      }
+    })
+
+    const cartItem = {
+      ...item,
+      quantity,
+      selectedModifiers: detailedModifiers,
+      price: calculateTotal() / quantity, // Base price + modifiers
+    }
+
+    onAddToCart(cartItem)
     onClose()
     setQuantity(1)
     setSelectedModifiers({})

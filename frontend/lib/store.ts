@@ -6,16 +6,17 @@ interface CartItem {
   name: string
   description?: string
   price: number
+  quantity: number
+  selectedModifiers?: any[]
   is_available?: boolean
   cartId?: number
-  modifiers?: Record<string, string[]>
-  originalPrice?: number
 }
 
 interface CartStore {
   items: CartItem[]
   addItem: (item: CartItem) => void
   removeItem: (index: number) => void
+  updateQuantity: (index: number, delta: number) => void
   clearCart: () => void
   getTotal: () => number
 }
@@ -24,16 +25,21 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (item) => set((state) => ({ 
-        items: [...state.items, { ...item, cartId: Date.now() }] 
+      addItem: (item) => set((state) => ({
+        items: [...state.items, { ...item, cartId: Date.now() }]
       })),
       removeItem: (index) => set((state) => ({
         items: state.items.filter((_, i) => i !== index)
       })),
+      updateQuantity: (index, delta) => set((state) => ({
+        items: state.items.map((item, i) =>
+          i === index ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+        )
+      })),
       clearCart: () => set({ items: [] }),
       getTotal: () => {
         const items = get().items
-        return items.reduce((sum, item) => sum + (item.price || 0), 0)
+        return items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
       }
     }),
     {
