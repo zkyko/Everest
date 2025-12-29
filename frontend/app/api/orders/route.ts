@@ -9,8 +9,16 @@ export async function POST(request: NextRequest) {
     const supabase = supabaseAdmin
     const body = await request.json()
     
+    console.log('📥 Received order request:', {
+      items_count: body.items?.length,
+      customer_name: body.customer_name,
+      customer_email: body.customer_email,
+      customer_phone: body.customer_phone
+    })
+    
     // Validate required fields
     if (!body.items || body.items.length === 0) {
+      console.error('❌ Validation failed: No items')
       return NextResponse.json(
         { error: 'Order must contain at least one item' },
         { status: 400 }
@@ -18,6 +26,10 @@ export async function POST(request: NextRequest) {
     }
     
     if (!body.customer_name || !body.customer_email) {
+      console.error('❌ Validation failed: Missing customer info', {
+        has_name: !!body.customer_name,
+        has_email: !!body.customer_email
+      })
       return NextResponse.json(
         { error: 'Customer name and email are required' },
         { status: 400 }
@@ -29,8 +41,12 @@ export async function POST(request: NextRequest) {
       return sum + (item.item_price * item.quantity)
     }, 0)
     
+    console.log('💰 Calculated total:', totalAmount)
+    
     // Create order
     const orderId = uuidv4()
+    console.log('🆔 Generated order ID:', orderId)
+    
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -45,12 +61,15 @@ export async function POST(request: NextRequest) {
       .single()
     
     if (orderError) {
-      console.error('Error creating order:', orderError)
+      console.error('❌ Error creating order:', orderError)
+      console.error('Order error details:', JSON.stringify(orderError, null, 2))
       return NextResponse.json(
-        { error: 'Failed to create order' },
+        { error: 'Failed to create order', details: orderError.message },
         { status: 500 }
       )
     }
+    
+    console.log('✅ Order created successfully:', order)
     
     // Create order items (with snapshots)
     const orderItems = body.items.map((item: any) => ({
@@ -63,19 +82,24 @@ export async function POST(request: NextRequest) {
       quantity: item.quantity || 1,
     }))
     
+    console.log('📦 Creating order items:', orderItems.length)
+    
     const { error: itemsError } = await supabase
       .from('order_items')
       .insert(orderItems)
     
     if (itemsError) {
-      console.error('Error creating order items:', itemsError)
+      console.error('❌ Error creating order items:', itemsError)
+      console.error('Items error details:', JSON.stringify(itemsError, null, 2))
       // Try to delete the order if items fail
       await supabase.from('orders').delete().eq('id', orderId)
       return NextResponse.json(
-        { error: 'Failed to create order items' },
+        { error: 'Failed to create order items', details: itemsError.message },
         { status: 500 }
       )
     }
+    
+    console.log('✅ Order items created successfully')
     
     // If modifiers exist, create order item modifiers
     if (body.items.some((item: any) => item.modifiers && item.modifiers.length > 0)) {
@@ -96,15 +120,23 @@ export async function POST(request: NextRequest) {
       })
       
       if (modifierInserts.length > 0) {
-        await supabase.from('order_item_modifiers').insert(modifierInserts)
+        console.log('🔧 Creating modifiers:', modifierInserts.length)
+        const { error: modError } = await supabase.from('order_item_modifiers').insert(modifierInserts)
+        if (modError) {
+          console.error('❌ Error creating modifiers:', modError)
+        } else {
+          console.log('✅ Modifiers created successfully')
+        }
       }
     }
     
+    console.log('🎉 Order complete! Returning order:', order.id)
     return NextResponse.json(order, { status: 201 })
   } catch (error: any) {
-    console.error('Orders API error:', error)
+    console.error('❌ Orders API error:', error)
+    console.error('Error stack:', error.stack)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }

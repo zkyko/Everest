@@ -42,6 +42,8 @@ export default function CheckoutPage() {
     setLoading(true)
 
     try {
+      console.log('🛒 Creating order with items:', items)
+      
       const orderItems = items.map(item => ({
         menu_item_id: item.id,
         item_name: item.name,
@@ -51,12 +53,21 @@ export default function CheckoutPage() {
         modifiers: item.selectedModifiers || []
       }))
 
+      console.log('📦 Order payload:', {
+        items: orderItems,
+        customer_name: formData.customer_name,
+        customer_email: formData.customer_email,
+        customer_phone: formData.customer_phone
+      })
+
       const response = await api.post('/orders', {
         items: orderItems,
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         customer_phone: formData.customer_phone || null
       })
+
+      console.log('✅ Order created:', response.data)
 
       // Get Stripe Checkout URL
       const checkoutResponse = await api.post('/checkout', {
@@ -65,16 +76,24 @@ export default function CheckoutPage() {
         cancel_url: `${window.location.origin}/cart`
       })
 
+      console.log('💳 Checkout session created:', checkoutResponse.data)
+
       if (checkoutResponse.data.checkout_url) {
         window.location.href = checkoutResponse.data.checkout_url
       } else {
         throw new Error('No checkout URL received')
       }
-    } catch (error) {
-      const dummyId = `order_${Date.now()}`
-      clearCart()
-      addToast('success', 'Order placed! (Demo mode)')
-      router.push(`/order-status/${dummyId}`)
+    } catch (error: any) {
+      console.error('❌ Checkout error:', error)
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to create order'
+      addToast('error', `Order failed: ${errorMsg}`)
+      
+      // Don't create dummy order - show the real error
+      setLoading(false)
+      return
     } finally {
       setLoading(false)
     }
