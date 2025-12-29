@@ -22,9 +22,8 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
     if (savedMode === 'dark' || savedMode === 'light') {
       setMode(savedMode)
     } else {
-      // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setMode(prefersDark ? 'dark' : 'light')
+      // Default to light mode (ignore system preference unless user explicitly chooses)
+      setMode('light')
     }
   }, [])
 
