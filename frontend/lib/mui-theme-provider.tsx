@@ -1,14 +1,15 @@
 'use client'
 
 import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeModeProvider } from './theme-context'
+import { ThemeProvider } from '@mui/material/styles'
+import { lightTheme } from './theme'
 
 export default function MUIThemeProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeModeProvider>
+    <ThemeProvider theme={lightTheme}>
       <CssBaseline />
       {children}
-    </ThemeModeProvider>
+    </ThemeProvider>
   )
 }
 

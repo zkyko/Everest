@@ -11,7 +11,7 @@ export const translations = {
         // Home Page
         home: {
             heroTitle: 'Everest',
-            heroSubtitle: 'Authentic Nepalese Street Food',
+            heroSubtitle: 'Taste that connects you to Nepal',
             orderNow: 'Order Takeout',
             viewMenu: 'View Menu',
             popularItems: 'Popular Items',
@@ -75,7 +75,7 @@ export const translations = {
         },
         home: {
             heroTitle: 'एभरेष्ट',
-            heroSubtitle: 'प्रामाणिक नेपाली खाजा',
+            heroSubtitle: 'नेपालसँग जोड्ने स्वाद',
             orderNow: 'अर्डर गर्नुहोस्',
             viewMenu: 'मेनु हेर्नुहोस्',
             popularItems: 'लोकप्रिय परिकार',

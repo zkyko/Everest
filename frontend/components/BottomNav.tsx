@@ -6,7 +6,6 @@ import { Home, Utensils, ShoppingBag, Settings2, X } from 'lucide-react'
 import { useLanguageStore } from '@/lib/store/languageStore'
 import { translations } from '@/lib/translations'
 import LanguageToggle from '@/components/LanguageToggle'
-import DarkModeToggle from '@/components/DarkModeToggle'
 import { useState } from 'react'
 import { useCartStore } from '@/lib/store'
 
@@ -231,27 +230,6 @@ export default function BottomNav() {
               </Typography>
             </Box>
             <LanguageToggle />
-          </Stack>
-
-          <Divider sx={{ my: 2 }} />
-
-          {/* Theme Setting */}
-          <Stack 
-            direction="row" 
-            alignItems="center" 
-            justifyContent="space-between" 
-            spacing={2}
-            sx={{ py: 1.5 }}
-          >
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
-                Theme
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Toggle between light and dark mode
-              </Typography>
-            </Box>
-            <DarkModeToggle />
           </Stack>
         </Box>
       </Drawer>

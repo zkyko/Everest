@@ -2,10 +2,10 @@
 
 import { Box, Container, Typography, Stack, Badge } from '@mui/material'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Home, Utensils, ShoppingBag } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
-import DarkModeToggle from './DarkModeToggle'
 import { useLanguageStore } from '@/lib/store/languageStore'
 import { translations } from '@/lib/translations'
 import { useCartStore } from '@/lib/store'
@@ -49,27 +49,28 @@ export default function Header() {
                     justifyContent: 'space-between' 
                 }}>
                     {/* Logo */}
-                    <Typography
-                        variant="h2"
-                        component={Link}
-                        href="/home"
-                        sx={{
-                            textDecoration: 'none',
-                            background: 'linear-gradient(135deg, #F4A261 0%, #E76F51 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            fontSize: '1.75rem',
-                            fontWeight: 900,
-                            letterSpacing: '-0.05em',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                            },
-                        }}
-                    >
-                        Everest
-                    </Typography>
+                    <Link href="/home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                height: 60,
+                                width: 140,
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-2px)',
+                                },
+                            }}
+                        >
+                            <Image
+                                src="/hero-background.png"
+                                alt="Everest Food Truck"
+                                fill
+                                sizes="140px"
+                                style={{ objectFit: 'contain' }}
+                                priority
+                            />
+                        </Box>
+                    </Link>
 
                     {/* Navigation */}
                     <Stack direction="row" spacing={0.5} alignItems="center">
@@ -138,7 +139,6 @@ export default function Header() {
                     {/* Settings */}
                     <Stack direction="row" spacing={1} alignItems="center">
                         <LanguageToggle />
-                        <DarkModeToggle />
                     </Stack>
                 </Box>
             </Container>

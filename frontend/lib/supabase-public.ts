@@ -23,3 +23,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabasePublic = createClient(supabaseUrl, supabaseAnonKey)
 
+
+

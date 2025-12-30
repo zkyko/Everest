@@ -6,6 +6,8 @@
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
   --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --font-bebas: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-poppins: 'Poppins', 'Inter', sans-serif;
 }
 
 * {

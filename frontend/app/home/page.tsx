@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Box, Container, Typography, Button, Card, CardContent, Grid, Stack, IconButton, useTheme } from '@mui/material'
 import { MapPin, Clock, ChevronRight, Star, Instagram, Phone, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import api from '@/lib/api'
 import { statusColors } from '@/lib/theme'
@@ -88,14 +89,40 @@ export default function HomePage() {
       {/* Hero Section */}
       <Box
         sx={{
-          bgcolor: theme.palette.mode === 'light' ? 'primary.main' : 'background.paper',
+          position: 'relative',
+          bgcolor: 'primary.main',
           color: 'primary.contrastText',
           pt: { xs: 8, md: 12 },
           pb: { xs: 8, md: 12 },
           px: 3,
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="lg">
+        {/* Background Logo */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            right: { xs: '50%', md: '-10%' },
+            transform: { xs: 'translate(50%, -50%)', md: 'translateY(-50%)' },
+            width: { xs: '90%', md: '55%' },
+            maxWidth: '700px',
+            height: 'auto',
+            aspectRatio: '2/1',
+            opacity: { xs: 0.2, md: 0.25 },
+            zIndex: 0,
+          }}
+        >
+          <Image
+            src="/hero-background.png"
+            alt="Everest Food Truck"
+            fill
+            sizes="(max-width: 768px) 90vw, 55vw"
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+        </Box>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={7}>
               <MotionTypography
@@ -105,8 +132,12 @@ export default function HomePage() {
                 variant="h1"
                 sx={{
                   mb: 2,
-                  color: theme.palette.mode === 'light' ? 'primary.contrastText' : 'text.primary',
-                  fontSize: { xs: '3.5rem', md: '5rem' },
+                  color: 'primary.contrastText',
+                  fontSize: { xs: '4.5rem', md: '7rem' },
+                  fontFamily: 'var(--font-bebas)',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  lineHeight: 0.9,
                 }}
               >
                 {t.heroTitle}
@@ -118,11 +149,14 @@ export default function HomePage() {
                 variant="h6"
                 sx={{
                   mb: 5,
-                  opacity: 0.8,
+                  opacity: 0.9,
                   fontWeight: 500,
-                  color: theme.palette.mode === 'light' ? 'primary.contrastText' : 'text.primary',
-                  fontSize: { xs: '1.1rem', md: '1.5rem' },
-                  maxWidth: '500px'
+                  color: 'primary.contrastText',
+                  fontSize: { xs: '1.15rem', md: '1.6rem' },
+                  fontFamily: 'var(--font-poppins)',
+                  letterSpacing: '0.02em',
+                  maxWidth: '500px',
+                  fontStyle: 'italic',
                 }}
               >
                 {t.heroSubtitle}
