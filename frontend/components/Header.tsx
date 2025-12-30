@@ -28,120 +28,170 @@ export default function Header() {
     }
 
     return (
-        <Box
-            component="header"
-            sx={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 1100,
-                bgcolor: 'background.paper',
-                backdropFilter: 'blur(20px)',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                display: { xs: 'none', md: 'block' },
-            }}
-        >
-            <Container maxWidth="lg">
+        <>
+            {/* Mobile Header */}
+            <Box
+                component="header"
+                sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1100,
+                    bgcolor: 'background.paper',
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    display: { xs: 'block', md: 'none' },
+                }}
+            >
                 <Box sx={{ 
-                    height: 80, 
+                    height: 64, 
                     display: 'flex', 
                     alignItems: 'center', 
-                    justifyContent: 'space-between' 
+                    justifyContent: 'space-between',
+                    px: 2,
                 }}>
                     {/* Logo */}
                     <Link href="/home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                         <Box
                             sx={{
                                 position: 'relative',
-                                height: 60,
-                                width: 140,
+                                height: 48,
+                                width: 110,
                                 transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                },
                             }}
                         >
                             <Image
                                 src="/hero-background.png"
                                 alt="Everest Food Truck"
                                 fill
-                                sizes="140px"
+                                sizes="110px"
                                 style={{ objectFit: 'contain' }}
                                 priority
                             />
                         </Box>
                     </Link>
 
-                    {/* Navigation */}
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                        {navItems.map((item) => {
-                            const Icon = item.icon
-                            const active = isActive(item.path)
-                            
-                            return (
-                                <Box
-                                    key={item.path}
-                                    component={Link}
-                                    href={item.path}
-                                    sx={{
-                                        position: 'relative',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                        px: 2.5,
-                                        py: 1.5,
-                                        borderRadius: 3,
-                                        textDecoration: 'none',
-                                        color: active ? 'primary.main' : 'text.secondary',
-                                        bgcolor: active ? 'rgba(244, 162, 97, 0.1)' : 'transparent',
-                                        border: '1px solid',
-                                        borderColor: active ? 'rgba(244, 162, 97, 0.3)' : 'transparent',
-                                        fontWeight: active ? 700 : 500,
-                                        fontSize: '0.875rem',
-                                        transition: 'all 0.2s ease',
-                                        '&:hover': {
-                                            color: 'primary.main',
-                                            bgcolor: 'rgba(244, 162, 97, 0.08)',
-                                            borderColor: 'rgba(244, 162, 97, 0.2)',
-                                            transform: 'translateY(-1px)',
-                                        },
-                                    }}
-                                >
-                                    <Badge 
-                                        badgeContent={item.badge} 
-                                        color="error"
-                                        sx={{
-                                            '& .MuiBadge-badge': {
-                                                fontSize: '0.65rem',
-                                                height: 16,
-                                                minWidth: 16,
-                                                fontWeight: 700,
-                                            }
-                                        }}
-                                    >
-                                        <Icon size={18} strokeWidth={active ? 2.5 : 2} />
-                                    </Badge>
-                                    <Typography 
-                                        component="span" 
-                                        sx={{ 
-                                            fontSize: 'inherit', 
-                                            fontWeight: 'inherit',
-                                            letterSpacing: '0.01em',
-                                        }}
-                                    >
-                                        {item.label}
-                                    </Typography>
-                                </Box>
-                            )
-                        })}
-                    </Stack>
-
-                    {/* Settings */}
-                    <Stack direction="row" spacing={1} alignItems="center">
-                        <LanguageToggle />
-                    </Stack>
+                    {/* Language Toggle */}
+                    <LanguageToggle />
                 </Box>
-            </Container>
-        </Box>
+            </Box>
+
+            {/* Desktop Header */}
+            <Box
+                component="header"
+                sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1100,
+                    bgcolor: 'background.paper',
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    display: { xs: 'none', md: 'block' },
+                }}
+            >
+                <Container maxWidth="lg">
+                    <Box sx={{ 
+                        height: 80, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between' 
+                    }}>
+                        {/* Logo */}
+                        <Link href="/home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                            <Box
+                                sx={{
+                                    position: 'relative',
+                                    height: 60,
+                                    width: 140,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                    },
+                                }}
+                            >
+                                <Image
+                                    src="/hero-background.png"
+                                    alt="Everest Food Truck"
+                                    fill
+                                    sizes="140px"
+                                    style={{ objectFit: 'contain' }}
+                                    priority
+                                />
+                            </Box>
+                        </Link>
+
+                        {/* Navigation */}
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                            {navItems.map((item) => {
+                                const Icon = item.icon
+                                const active = isActive(item.path)
+                                
+                                return (
+                                    <Box
+                                        key={item.path}
+                                        component={Link}
+                                        href={item.path}
+                                        sx={{
+                                            position: 'relative',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            px: 2.5,
+                                            py: 1.5,
+                                            borderRadius: 3,
+                                            textDecoration: 'none',
+                                            color: active ? 'primary.main' : 'text.secondary',
+                                            bgcolor: active ? 'rgba(244, 162, 97, 0.1)' : 'transparent',
+                                            border: '1px solid',
+                                            borderColor: active ? 'rgba(244, 162, 97, 0.3)' : 'transparent',
+                                            fontWeight: active ? 700 : 500,
+                                            fontSize: '0.875rem',
+                                            transition: 'all 0.2s ease',
+                                            '&:hover': {
+                                                color: 'primary.main',
+                                                bgcolor: 'rgba(244, 162, 97, 0.08)',
+                                                borderColor: 'rgba(244, 162, 97, 0.2)',
+                                                transform: 'translateY(-1px)',
+                                            },
+                                        }}
+                                    >
+                                        <Badge 
+                                            badgeContent={item.badge} 
+                                            color="error"
+                                            sx={{
+                                                '& .MuiBadge-badge': {
+                                                    fontSize: '0.65rem',
+                                                    height: 16,
+                                                    minWidth: 16,
+                                                    fontWeight: 700,
+                                                }
+                                            }}
+                                        >
+                                            <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                                        </Badge>
+                                        <Typography 
+                                            component="span" 
+                                            sx={{ 
+                                                fontSize: 'inherit', 
+                                                fontWeight: 'inherit',
+                                                letterSpacing: '0.01em',
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Typography>
+                                    </Box>
+                                )
+                            })}
+                        </Stack>
+
+                        {/* Settings */}
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <LanguageToggle />
+                        </Stack>
+                    </Box>
+                </Container>
+            </Box>
+        </>
     )
 }
