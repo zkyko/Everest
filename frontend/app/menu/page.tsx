@@ -39,12 +39,20 @@ export default function MenuPage() {
         const response = await api.get('/menu')
         if (response.data && response.data.categories) {
           setMenu(response.data.categories)
+          // Set active category to first available category with items
+          const firstCategoryWithItems = response.data.categories.findIndex((cat: any) => 
+            cat.menu_items && cat.menu_items.length > 0
+          )
+          if (firstCategoryWithItems !== -1) {
+            setActiveCategory(firstCategoryWithItems)
+          }
         } else {
           setMenu([])
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error('Error loading menu:', e)
-        addToast('error', 'Failed to load menu')
+        const errorMessage = e?.response?.data?.error || e?.response?.data?.detail || e?.message || 'Failed to load menu'
+        addToast('error', errorMessage)
         setMenu([])
       } finally {
         setLoading(false)
@@ -95,26 +103,28 @@ export default function MenuPage() {
               </IconButton>
             </Stack>
 
-            <Tabs
-              value={activeCategory}
-              onChange={(_, v) => setActiveCategory(v)}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
-                '& .MuiTab-root': {
-                  minWidth: 'auto',
-                  px: 3,
-                  py: 1.5,
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&.Mui-selected': { color: 'primary.main' }
-                }
-              }}
-            >
-              {menu?.map((cat) => <Tab key={cat.id} label={cat.name} />) || []}
-            </Tabs>
+            {menu && menu.length > 0 && (
+              <Tabs
+                value={Math.min(activeCategory, menu.length - 1)}
+                onChange={(_, v) => setActiveCategory(v)}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{
+                  '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+                  '& .MuiTab-root': {
+                    minWidth: 'auto',
+                    px: 3,
+                    py: 1.5,
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    '&.Mui-selected': { color: 'primary.main' }
+                  }
+                }}
+              >
+                {menu.map((cat) => <Tab key={cat.id} label={cat.name} />)}
+              </Tabs>
+            )}
           </Box>
         </Container>
       </Box>
@@ -137,7 +147,7 @@ export default function MenuPage() {
                   <Skeleton variant="rectangular" height={180} sx={{ borderRadius: 4 }} />
                 </Grid>
               ))
-            ) : menu[activeCategory]?.menu_items && menu[activeCategory].menu_items.length > 0 ? (
+            ) : menu && menu[activeCategory]?.menu_items && menu[activeCategory].menu_items.length > 0 ? (
               menu[activeCategory].menu_items.map((item: any, idx: number) => (
                 <Grid item xs={12} sm={6} md={4} key={item.id}>
                   <MotionBox

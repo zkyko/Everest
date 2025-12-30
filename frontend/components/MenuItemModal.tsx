@@ -29,13 +29,15 @@ interface ModifierGroup {
   is_required: boolean
   min_selections: number
   max_selections: number
-  options: ModifierOption[]
+  modifier_options?: ModifierOption[]
+  options?: ModifierOption[]
 }
 
 interface ModifierOption {
   id: string
   name: string
-  price_modifier: number
+  price_modifier?: number
+  price_adjustment?: number
 }
 
 interface ModifierGroupLike {
@@ -44,7 +46,8 @@ interface ModifierGroupLike {
   is_required: boolean
   min_selections?: number
   max_selections?: number
-  options: ModifierOption[]
+  modifier_options?: ModifierOption[]
+  options?: ModifierOption[]
 }
 
 interface MenuItemModalProps {
@@ -69,7 +72,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
       is_required: true,
       min_selections: 1,
       max_selections: 1,
-      options: [
+      modifier_options: [
         { id: 'mild', name: lang === 'en' ? 'Mild' : 'न्यून', price_modifier: 0 },
         { id: 'medium', name: lang === 'en' ? 'Medium' : 'मध्यम', price_modifier: 0 },
         { id: 'hot', name: lang === 'en' ? 'Hot' : 'पिरो', price_modifier: 0 },
@@ -82,7 +85,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
       is_required: false,
       min_selections: 0,
       max_selections: 5,
-      options: [
+      modifier_options: [
         { id: 'extra-rice', name: lang === 'en' ? 'Extra Rice' : 'थप भात', price_modifier: 2.00 },
         { id: 'extra-meat', name: lang === 'en' ? 'Extra Meat' : 'थप मासु', price_modifier: 3.00 },
         { id: 'extra-veggies', name: lang === 'en' ? 'Extra Vegetables' : 'थप तरकारी', price_modifier: 1.50 },
@@ -90,7 +93,11 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     },
   ]
 
-  const modifierGroups: ModifierGroupLike[] = item.modifier_groups || defaultModifiers
+  // Normalize modifier groups to handle both database format (modifier_options) and fallback format (options)
+  const modifierGroups: ModifierGroupLike[] = (item.modifier_groups || defaultModifiers).map((group: any) => ({
+    ...group,
+    options: group.modifier_options || group.options || []
+  }))
 
   const handleModifierChange = (groupId: string, optionId: string, isMultiple: boolean) => {
     setSelectedModifiers((prev) => {
@@ -110,10 +117,10 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     let total = parseFloat(item.price || 0)
     Object.entries(selectedModifiers).forEach(([groupId, optionIds]) => {
       const group = modifierGroups.find(g => g.id === groupId)
-      if (group) {
+      if (group && group.options) {
         optionIds.forEach(id => {
-          const opt = group.options.find(o => o.id === id)
-          if (opt) total += opt.price_modifier
+          const opt = group.options?.find(o => o.id === id)
+          if (opt) total += (opt.price_modifier ?? opt.price_adjustment ?? 0)
         })
       }
     })
@@ -124,14 +131,14 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
     const detailedModifiers: any[] = []
     Object.entries(selectedModifiers).forEach(([groupId, optionIds]) => {
       const group = modifierGroups.find(g => g.id === groupId)
-      if (group) {
+      if (group && group.options) {
         optionIds.forEach(id => {
-          const opt = group.options.find(o => o.id === id)
+          const opt = group.options?.find(o => o.id === id)
           if (opt) {
             detailedModifiers.push({
               id: opt.id,
               name: opt.name,
-              price: opt.price_modifier
+              price: opt.price_modifier ?? opt.price_adjustment ?? 0
             })
           }
         })
@@ -181,7 +188,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
         </Box>
 
         <DialogContent sx={{ px: 3, py: 2 }}>
-          <Stack spacing={4}>
+                <Stack spacing={4}>
             {modifierGroups.map((group) => (
               <Box key={group.id}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -199,7 +206,7 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
                     onChange={(e) => handleModifierChange(group.id, e.target.value, false)}
                   >
                     <Stack spacing={1}>
-                      {group.options.map((option) => (
+                      {(group.options || []).map((option) => (
                         <Box
                           key={option.id}
                           sx={{
@@ -215,9 +222,9 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
                             label={
                               <Stack direction="row" justifyContent="space-between" sx={{ width: '100%', minWidth: '200px' }}>
                                 <Typography variant="body2">{option.name}</Typography>
-                                {option.price_modifier > 0 && (
+                                {(option.price_modifier ?? option.price_adjustment ?? 0) > 0 && (
                                   <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
-                                    +${option.price_modifier.toFixed(2)}
+                                    +${((option.price_modifier ?? option.price_adjustment ?? 0).toFixed(2))}
                                   </Typography>
                                 )}
                               </Stack>
@@ -230,8 +237,9 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
                   </RadioGroup>
                 ) : (
                   <Stack spacing={1}>
-                    {group.options.map((option) => {
+                    {(group.options || []).map((option) => {
                       const active = selectedModifiers[group.id]?.includes(option.id)
+                      const priceModifier = option.price_modifier ?? option.price_adjustment ?? 0
                       return (
                         <Box
                           key={option.id}
@@ -245,9 +253,9 @@ export default function MenuItemModal({ open, item, onClose, onAddToCart }: Menu
                           }}
                         >
                           <Typography variant="body2">{option.name}</Typography>
-                          {option.price_modifier > 0 && (
+                          {priceModifier > 0 && (
                             <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
-                              +${option.price_modifier.toFixed(2)}
+                              +${priceModifier.toFixed(2)}
                             </Typography>
                           )}
                         </Box>

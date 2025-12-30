@@ -33,9 +33,10 @@ export default function AdminMenu() {
       const response = await api.get('/admin/menu')
       console.log('📋 Menu data received:', response.data)
       setMenu(response.data || [])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch menu:', error)
-      addToast('error', 'Failed to load menu')
+      const errorMessage = error?.response?.data?.error || error?.response?.data?.detail || error?.message || 'Failed to load menu'
+      addToast('error', errorMessage)
     } finally {
       setLoading(false)
     }

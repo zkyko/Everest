@@ -40,9 +40,10 @@ export default function AdminOrders() {
       if (newOrders.length > 0 && !alertOrder) {
         setAlertOrder(newOrders[0])
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching orders:', err)
-      addToast('error', 'Failed to load orders')
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to load orders'
+      addToast('error', errorMessage)
       setOrders([])
     } finally {
       setLoading(false)
