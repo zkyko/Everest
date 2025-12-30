@@ -5,9 +5,11 @@ import {
   Box, Container, Typography, Card, CardContent, Button, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Select, MenuItem, FormControl, InputLabel, Chip, CircularProgress,
-  Grid, Checkbox, FormControlLabel
+  Grid, Checkbox, FormControlLabel, Accordion, AccordionSummary,
+  AccordionDetails, Divider, Stack
 } from '@mui/material'
-import { Plus, Edit2, Trash2, Tag, CheckCircle2, X, DollarSign, Package } from 'lucide-react'
+import { Plus, Edit2, Trash2, Tag, CheckCircle2, X, DollarSign, Package, 
+  ChevronDown, Image as ImageIcon, Settings } from 'lucide-react'
 import api from '@/lib/api'
 import { useToast } from '@/components/Toast'
 
@@ -311,19 +313,37 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
     price: item?.price ? parseFloat(item.price).toFixed(2) : '',
     category_id: item?.category_id || (categories[0]?.id || ''),
     is_available: item?.is_available !== undefined ? item.is_available : true,
-    display_order: item?.display_order || 0
+    display_order: item?.display_order || 0,
+    modifier_groups: [] as any[],
+    dietary_tags: [] as string[]
   })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (item) {
+      // Normalize modifier groups from database format
+      const modifierGroups = (item.modifier_groups || []).map((group: any) => ({
+        id: group.id,
+        name: group.name,
+        is_required: group.is_required || false,
+        display_order: group.display_order || 0,
+        options: (group.modifier_options || []).map((opt: any) => ({
+          id: opt.id,
+          name: opt.name,
+          price_adjustment: opt.price_adjustment || 0,
+          display_order: opt.display_order || 0
+        }))
+      }))
+
       setFormData({
         name: item.name || '',
         description: item.description || '',
         price: item.price ? parseFloat(item.price).toFixed(2) : '',
         category_id: item.category_id || (categories[0]?.id || ''),
         is_available: item.is_available !== undefined ? item.is_available : true,
-        display_order: item.display_order || 0
+        display_order: item.display_order || 0,
+        modifier_groups: modifierGroups,
+        dietary_tags: item.dietary_tags || []
       })
     } else {
       setFormData({
@@ -332,7 +352,9 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
         price: '',
         category_id: categories[0]?.id || '',
         is_available: true,
-        display_order: 0
+        display_order: 0,
+        modifier_groups: [],
+        dietary_tags: []
       })
     }
   }, [item, categories])
@@ -346,28 +368,100 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
     await onSave({
       ...formData,
       price: parseFloat(formData.price),
-      category_id: formData.category_id || null
+      category_id: formData.category_id || null,
+      modifier_groups: formData.modifier_groups.map(g => ({
+        ...g,
+        id: undefined // Let API create new IDs
+      }))
     })
     setSaving(false)
   }
 
+  const addModifierGroup = () => {
+    setFormData({
+      ...formData,
+      modifier_groups: [
+        ...formData.modifier_groups,
+        {
+          id: `temp-${Date.now()}`,
+          name: '',
+          is_required: false,
+          display_order: formData.modifier_groups.length,
+          options: []
+        }
+      ]
+    })
+  }
+
+  const removeModifierGroup = (index: number) => {
+    setFormData({
+      ...formData,
+      modifier_groups: formData.modifier_groups.filter((_, i) => i !== index)
+    })
+  }
+
+  const updateModifierGroup = (index: number, updates: any) => {
+    const updated = [...formData.modifier_groups]
+    updated[index] = { ...updated[index], ...updates }
+    setFormData({ ...formData, modifier_groups: updated })
+  }
+
+  const addModifierOption = (groupIndex: number) => {
+    const updated = [...formData.modifier_groups]
+    updated[groupIndex].options = [
+      ...(updated[groupIndex].options || []),
+      {
+        id: `temp-opt-${Date.now()}`,
+        name: '',
+        price_adjustment: 0,
+        display_order: (updated[groupIndex].options || []).length
+      }
+    ]
+    setFormData({ ...formData, modifier_groups: updated })
+  }
+
+  const removeModifierOption = (groupIndex: number, optionIndex: number) => {
+    const updated = [...formData.modifier_groups]
+    updated[groupIndex].options = updated[groupIndex].options.filter((_, i) => i !== optionIndex)
+    setFormData({ ...formData, modifier_groups: updated })
+  }
+
+  const updateModifierOption = (groupIndex: number, optionIndex: number, updates: any) => {
+    const updated = [...formData.modifier_groups]
+    updated[groupIndex].options[optionIndex] = {
+      ...updated[groupIndex].options[optionIndex],
+      ...updates
+    }
+    setFormData({ ...formData, modifier_groups: updated })
+  }
+
+  const toggleDietaryTag = (tag: string) => {
+    const tags = formData.dietary_tags.includes(tag)
+      ? formData.dietary_tags.filter(t => t !== tag)
+      : [...formData.dietary_tags, tag]
+    setFormData({ ...formData, dietary_tags: tags })
+  }
+
+  const dietaryOptions = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Spicy']
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{item ? 'Edit Item' : 'Add Menu Item'}</DialogTitle>
       <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1, maxHeight: '70vh', overflow: 'auto' }}>
+          {/* Basic Info */}
           <TextField
             fullWidth
             label="Item Name *"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g., Chicken Chow Mein"
+            placeholder="e.g., Chicken Momo"
             required
           />
           <TextField
             fullWidth
             multiline
-            rows={4}
+            rows={3}
             label="Description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -381,9 +475,7 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
                 type="number"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                inputProps={{
-                  step: "0.01"
-                }}
+                inputProps={{ step: "0.01" }}
                 InputProps={{
                   startAdornment: <DollarSign size={18} style={{ marginRight: 8, opacity: 0.5 }} />
                 }}
@@ -408,6 +500,174 @@ function ItemDialog({ open, item, categories, onClose, onSave }: any) {
               </FormControl>
             </Grid>
           </Grid>
+
+          {/* Dietary Tags */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Dietary Tags</Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              {dietaryOptions.map(tag => (
+                <Chip
+                  key={tag}
+                  label={tag}
+                  onClick={() => toggleDietaryTag(tag)}
+                  color={formData.dietary_tags.includes(tag) ? 'primary' : 'default'}
+                  variant={formData.dietary_tags.includes(tag) ? 'filled' : 'outlined'}
+                  sx={{ cursor: 'pointer' }}
+                />
+              ))}
+            </Stack>
+          </Box>
+
+          {/* Image Upload (Placeholder) */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Product Image</Typography>
+            <Button
+              variant="outlined"
+              startIcon={<ImageIcon size={18} />}
+              component="label"
+              fullWidth
+              sx={{ py: 2 }}
+            >
+              Upload Image
+              <input type="file" accept="image/*" hidden />
+            </Button>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              Image upload will be available after Supabase Storage setup
+            </Typography>
+          </Box>
+
+          <Divider />
+
+          {/* Modifier Groups */}
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Customization Options (Spice Level, Add-ons, etc.)
+              </Typography>
+              <Button
+                size="small"
+                startIcon={<Plus size={16} />}
+                onClick={addModifierGroup}
+                variant="outlined"
+              >
+                Add Group
+              </Button>
+            </Box>
+
+            {formData.modifier_groups.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                No customization options. Click "Add Group" to add spice levels, add-ons, etc.
+              </Typography>
+            )}
+
+            {formData.modifier_groups.map((group, groupIndex) => (
+              <Accordion key={group.id || groupIndex} defaultExpanded sx={{ mb: 1 }}>
+                <AccordionSummary expandIcon={<ChevronDown size={20} />}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
+                    <Settings size={16} />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {group.name || `Modifier Group ${groupIndex + 1}`}
+                    </Typography>
+                    {group.is_required && (
+                      <Chip label="Required" size="small" color="primary" sx={{ height: 20, fontSize: '0.65rem' }} />
+                    )}
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack spacing={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={8}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Group Name"
+                          value={group.name}
+                          onChange={(e) => updateModifierGroup(groupIndex, { name: e.target.value })}
+                          placeholder="e.g., Spice Level, Add-ons"
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={group.is_required}
+                              onChange={(e) => updateModifierGroup(groupIndex, { is_required: e.target.checked })}
+                            />
+                          }
+                          label="Required"
+                        />
+                      </Grid>
+                    </Grid>
+
+                    <Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary">Options</Typography>
+                        <Button
+                          size="small"
+                          startIcon={<Plus size={14} />}
+                          onClick={() => addModifierOption(groupIndex)}
+                          variant="text"
+                        >
+                          Add Option
+                        </Button>
+                      </Box>
+                      {group.options && group.options.length > 0 ? (
+                        <Stack spacing={1}>
+                          {group.options.map((option: any, optionIndex: number) => (
+                            <Box key={option.id || optionIndex} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <TextField
+                                size="small"
+                                placeholder="Option name"
+                                value={option.name}
+                                onChange={(e) => updateModifierOption(groupIndex, optionIndex, { name: e.target.value })}
+                                sx={{ flexGrow: 1 }}
+                              />
+                              <TextField
+                                size="small"
+                                type="number"
+                                placeholder="Price"
+                                value={option.price_adjustment || 0}
+                                onChange={(e) => updateModifierOption(groupIndex, optionIndex, { 
+                                  price_adjustment: parseFloat(e.target.value) || 0 
+                                })}
+                                inputProps={{ step: "0.01" }}
+                                sx={{ width: 100 }}
+                                InputProps={{
+                                  startAdornment: <DollarSign size={14} style={{ marginRight: 4, opacity: 0.5 }} />
+                                }}
+                              />
+                              <IconButton
+                                size="small"
+                                onClick={() => removeModifierOption(groupIndex, optionIndex)}
+                                color="error"
+                              >
+                                <X size={16} />
+                              </IconButton>
+                            </Box>
+                          ))}
+                        </Stack>
+                      ) : (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', py: 1 }}>
+                          No options yet. Add options like "Mild", "Medium", "Hot" for spice levels.
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <Button
+                      size="small"
+                      startIcon={<Trash2 size={14} />}
+                      onClick={() => removeModifierGroup(groupIndex)}
+                      color="error"
+                      variant="outlined"
+                    >
+                      Remove Group
+                    </Button>
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+
           <FormControlLabel
             control={
               <Checkbox

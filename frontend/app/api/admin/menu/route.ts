@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = supabaseAdmin
 
-    // Fetch all categories with their menu items
+    // Fetch all categories with their menu items and modifier groups
     const { data: categories, error } = await supabase
       .from('menu_categories')
       .select(`
@@ -44,7 +44,19 @@ export async function GET(request: NextRequest) {
           is_available,
           display_order,
           category_id,
-          created_at
+          created_at,
+          modifier_groups (
+            id,
+            name,
+            is_required,
+            display_order,
+            modifier_options (
+              id,
+              name,
+              price_adjustment,
+              display_order
+            )
+          )
         )
       `)
       .order('display_order', { ascending: true })

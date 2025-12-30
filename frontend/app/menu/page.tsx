@@ -211,6 +211,10 @@ export default function MenuPage() {
                           </Stack>
                           <IconButton
                             disabled={!item.is_available}
+                            onClick={(e) => {
+                              e.stopPropagation() // Prevent card click
+                              handleItemClick(item)
+                            }}
                             sx={{
                               bgcolor: 'primary.main', color: 'white',
                               width: 36, height: 36,
